@@ -23,6 +23,14 @@ def _get(url: str, params: dict | None = None) -> dict:
                 continue
             response.raise_for_status()
             return response.json()
+        except requests.HTTPError as exc:
+            # Don't retry on 4xx client errors (429 is already handled above)
+            if exc.response is not None and 400 <= exc.response.status_code < 500:
+                raise
+            if attempt == _MAX_RETRIES - 1:
+                raise
+            time.sleep(_RETRY_BACKOFF * (attempt + 1))
+            print(f"  Retrying ({attempt + 1}/{_MAX_RETRIES}) after error: {exc}", flush=True)
         except requests.RequestException as exc:
             if attempt == _MAX_RETRIES - 1:
                 raise
@@ -31,13 +39,20 @@ def _get(url: str, params: dict | None = None) -> dict:
     raise RuntimeError(f"All {_MAX_RETRIES} retries exhausted for {url}")
 
 
-def _get_dandiset_created(dandiset_id: str, cache: dict[str, datetime]) -> datetime:
-    """Return the creation datetime for a dandiset, using a local cache to avoid redundant calls."""
+def _get_dandiset_created(dandiset_id: str, cache: dict[str, datetime | None]) -> datetime | None:
+    """Return the creation datetime for a dandiset, or None if the dandiset no longer exists."""
     if dandiset_id not in cache:
         padded = dandiset_id.zfill(6)
-        data = _get(f"{DANDI_API_BASE}/dandisets/{padded}/")
-        created_str = data["created"]
-        cache[dandiset_id] = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+        try:
+            data = _get(f"{DANDI_API_BASE}/dandisets/{padded}/")
+            created_str = data["created"]
+            cache[dandiset_id] = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                print(f"  Warning: dandiset {dandiset_id} not found (404), skipping", flush=True)
+                cache[dandiset_id] = None
+            else:
+                raise
     return cache[dandiset_id]
 
 
@@ -95,7 +110,7 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         multiple_paths_same_dandiset: dict = yaml.safe_load(file_stream) or {}
 
     cache: dict[str, dict[str, str]] = {}
-    dandiset_created_cache: dict[str, datetime] = {}
+    dandiset_created_cache: dict[str, datetime | None] = {}
     asset_created_cache: dict[tuple[str, str], datetime | None] = {}
 
     # Resolve entries where the same content-ID appears in multiple dandisets.
@@ -108,12 +123,20 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         # dandisets is a dict of {dandiset_id: [list of paths]}.
         # PyYAML may parse numeric keys as integers, so normalize to strings.
         normalized: dict[str, list[str]] = {str(k): [str(p) for p in v] for k, v in dandisets.items()}
+
+        # Resolve creation timestamps; exclude dandisets that have been deleted (404).
+        created_by_id = {d: _get_dandiset_created(d, dandiset_created_cache) for d in normalized}
+        available = {d: paths for d, paths in normalized.items() if created_by_id[d] is not None}
+        if not available:
+            print(f"  Warning: all dandisets for content_id={content_id!r} returned 404, skipping", flush=True)
+            continue
+
         earliest_dandiset_id = min(
-            normalized.keys(),
-            key=lambda d: _get_dandiset_created(d, dandiset_created_cache),
+            available.keys(),
+            key=lambda d: created_by_id[d],  # type: ignore[return-value]
         )
 
-        paths: list[str] = normalized[earliest_dandiset_id]
+        paths: list[str] = available[earliest_dandiset_id]
         if len(paths) == 1:
             path = paths[0]
         else:
