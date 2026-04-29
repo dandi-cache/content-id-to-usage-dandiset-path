@@ -1,6 +1,7 @@
 name: Update
 
 on:
+  push:
   schedule:
     - cron: "0 4 * * *"  # Run daily at 04:00 UTC, after the source cache has updated
   workflow_dispatch:
