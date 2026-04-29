@@ -79,7 +79,7 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
     with multiple_paths_path.open(mode="r") as file_stream:
         multiple_paths_same_dandiset: dict = yaml.safe_load(file_stream) or {}
 
-    cache: dict[str, dict[str, str]] = {}
+    content_id_to_dandiset_path: dict[str, dict[str, str]] = {}
     dandiset_cache: dict[str, RemoteDandiset | None] = {}
     asset_created_cache: dict[tuple[str, str], datetime | None] = {}
 
@@ -114,7 +114,7 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         else:
             path = _get_earliest_asset_path(ds_by_id[earliest_dandiset_id], paths, asset_created_cache)  # type: ignore[arg-type]
 
-        cache[content_id] = {earliest_dandiset_id: path}
+        content_id_to_dandiset_path[content_id] = {earliest_dandiset_id: path}
 
     # Resolve entries where the same content-ID appears in multiple paths within one dandiset.
     # Heuristic: prefer the asset path that was created first.
@@ -136,12 +136,12 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
             continue
 
         path = _get_earliest_asset_path(dandiset, paths, asset_created_cache)
-        cache[content_id] = {dandiset_id: path}
+        content_id_to_dandiset_path[content_id] = {dandiset_id: path}
 
     output_file_path = base_directory / "derivatives" / "content_id_to_usage_dandiset_path.yaml"
-    print(f"Writing {len(cache)} entries to {output_file_path}", flush=True)
+    print(f"Writing {len(content_id_to_dandiset_path)} entries to {output_file_path}", flush=True)
     with output_file_path.open(mode="w") as file_stream:
-        yaml.safe_dump(data=cache, stream=file_stream)
+        yaml.safe_dump(data=content_id_to_dandiset_path, stream=file_stream)
 
 
 if __name__ == "__main__":
