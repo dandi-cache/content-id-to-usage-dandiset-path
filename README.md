@@ -2,7 +2,7 @@
 
 A one-to-one mapping from content IDs to a single (dandiset ID, asset path) pair, resolved from the non-unique entries in [`dandi-cache/content-id-to-unique-dandiset-path`](https://github.com/dandi-cache/content-id-to-unique-dandiset-path).
 
-This approach is entirely heuristic, is technically 'not true', but is also not any more false than what we have currently anyhow.
+This approach is entirely heuristic, is technically 'not true', but is also not 'any more false' than what we currently have.
 
 This cache may be retired when or if fully audit tracking or watermark enforcement is ever fully integrated.
 
