@@ -1,68 +1,38 @@
 import pathlib
 import sys
-import time
 from datetime import datetime
 
-import requests
 import yaml
-
-DANDI_API_BASE = "https://api.dandiarchive.org/api"
-_REQUEST_TIMEOUT = 30
-_MAX_RETRIES = 5
-_RETRY_BACKOFF = 2.0
+from dandi.dandiapi import DandiAPIClient, RemoteDandiset
+from dandi.exceptions import NotFoundError
 
 
-def _get(url: str, params: dict | None = None) -> dict:
-    """Make a GET request to the DANDI API with retries."""
-    for attempt in range(_MAX_RETRIES):
-        try:
-            response = requests.get(url, params=params, timeout=_REQUEST_TIMEOUT)
-            if response.status_code == 429:
-                retry_after = float(response.headers.get("Retry-After", _RETRY_BACKOFF * (attempt + 1)))
-                time.sleep(retry_after)
-                continue
-            response.raise_for_status()
-            return response.json()
-        except requests.HTTPError as exc:
-            # Don't retry on 4xx client errors (429 is already handled above)
-            if exc.response is not None and 400 <= exc.response.status_code < 500:
-                raise
-            if attempt == _MAX_RETRIES - 1:
-                raise
-            time.sleep(_RETRY_BACKOFF * (attempt + 1))
-            print(f"  Retrying ({attempt + 1}/{_MAX_RETRIES}) after error: {exc}", flush=True)
-        except requests.RequestException as exc:
-            if attempt == _MAX_RETRIES - 1:
-                raise
-            time.sleep(_RETRY_BACKOFF * (attempt + 1))
-            print(f"  Retrying ({attempt + 1}/{_MAX_RETRIES}) after error: {exc}", flush=True)
-    raise RuntimeError(f"All {_MAX_RETRIES} retries exhausted for {url}")
-
-
-def _get_dandiset_created(dandiset_id: str, cache: dict[str, datetime | None]) -> datetime | None:
-    """Return the creation datetime for a dandiset, or None if the dandiset no longer exists."""
+def _get_dandiset(
+    client: DandiAPIClient, dandiset_id: str, cache: dict[str, RemoteDandiset | None]
+) -> RemoteDandiset | None:
+    """Return a RemoteDandiset for *dandiset_id*, or None if the dandiset no longer exists."""
     if dandiset_id not in cache:
-        padded = dandiset_id.zfill(6)
         try:
-            data = _get(f"{DANDI_API_BASE}/dandisets/{padded}/")
-            created_str = data["created"]
-            cache[dandiset_id] = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
-        except requests.HTTPError as exc:
-            if exc.response is not None and exc.response.status_code == 404:
-                print(f"  Warning: dandiset {dandiset_id} not found (404), skipping", flush=True)
-                cache[dandiset_id] = None
-            else:
-                raise
+            dandiset = client.get_dandiset(dandiset_id)
+            # Access .created to trigger the lazy load and detect a missing dandiset early.
+            _ = dandiset.created
+            cache[dandiset_id] = dandiset
+        except NotFoundError:
+            print(f"  Warning: dandiset {dandiset_id} not found, skipping", flush=True)
+            cache[dandiset_id] = None
     return cache[dandiset_id]
 
 
-def _get_earliest_asset_path(dandiset_id: str, paths: list[str], cache: dict[tuple[str, str], datetime | None]) -> str:
-    """Return the path from *paths* whose asset was created earliest in *dandiset_id*.
+def _get_earliest_asset_path(
+    dandiset: RemoteDandiset,
+    paths: list[str],
+    cache: dict[tuple[str, str], datetime | None],
+) -> str:
+    """Return the path from *paths* whose asset was created earliest in *dandiset*.
 
-    Falls back to the first path if the dandiset no longer exists (404) or no
-    asset timestamps can be retrieved.
+    Falls back to the first path if no asset timestamps can be retrieved.
     """
-    padded = dandiset_id.zfill(6)
+    dandiset_id = dandiset.identifier
     earliest_path = paths[0]
     earliest_created: datetime | None = None
 
@@ -70,22 +40,11 @@ def _get_earliest_asset_path(dandiset_id: str, paths: list[str], cache: dict[tup
         key = (dandiset_id, path)
         if key not in cache:
             try:
-                data = _get(
-                    f"{DANDI_API_BASE}/dandisets/{padded}/versions/draft/assets/",
-                    params={"path": path},
-                )
-                results = data.get("results", [])
-                if results:
-                    created_str = results[0]["created"]
-                    cache[key] = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
-                else:
-                    cache[key] = None
-            except requests.HTTPError as exc:
-                if exc.response is not None and exc.response.status_code == 404:
-                    print(f"  Warning: 404 fetching assets for dandiset {dandiset_id}, path {path!r}", flush=True)
-                    cache[key] = None
-                else:
-                    raise
+                asset = dandiset.get_asset_by_path(path)
+                cache[key] = asset.created
+            except NotFoundError:
+                print(f"  Warning: asset {path!r} not found in dandiset {dandiset_id}", flush=True)
+                cache[key] = None
 
         created = cache[key]
         if created is not None and (earliest_created is None or created < earliest_created):
@@ -121,8 +80,10 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         multiple_paths_same_dandiset: dict = yaml.safe_load(file_stream) or {}
 
     cache: dict[str, dict[str, str]] = {}
-    dandiset_created_cache: dict[str, datetime | None] = {}
+    dandiset_cache: dict[str, RemoteDandiset | None] = {}
     asset_created_cache: dict[tuple[str, str], datetime | None] = {}
+
+    client = DandiAPIClient()
 
     # Resolve entries where the same content-ID appears in multiple dandisets.
     # Heuristic: prefer the dandiset that came into existence first.
@@ -135,23 +96,23 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         # PyYAML may parse numeric keys as integers, so normalize to strings.
         normalized: dict[str, list[str]] = {str(k): [str(p) for p in v] for k, v in dandisets.items()}
 
-        # Resolve creation timestamps; exclude dandisets that have been deleted (404).
-        created_by_id = {d: _get_dandiset_created(d, dandiset_created_cache) for d in normalized}
-        available = {d: paths for d, paths in normalized.items() if created_by_id[d] is not None}
+        # Resolve dandiset objects; exclude dandisets that have been deleted.
+        ds_by_id = {d: _get_dandiset(client, d, dandiset_cache) for d in normalized}
+        available = {d: paths for d, paths in normalized.items() if ds_by_id[d] is not None}
         if not available:
-            print(f"  Warning: all dandisets for content_id={content_id!r} returned 404, skipping", flush=True)
+            print(f"  Warning: all dandisets for content_id={content_id!r} not found, skipping", flush=True)
             continue
 
         earliest_dandiset_id = min(
             available.keys(),
-            key=lambda d: created_by_id[d],  # type: ignore[return-value]
+            key=lambda d: ds_by_id[d].created,  # type: ignore[union-attr]
         )
 
         paths: list[str] = available[earliest_dandiset_id]
         if len(paths) == 1:
             path = paths[0]
         else:
-            path = _get_earliest_asset_path(earliest_dandiset_id, paths, asset_created_cache)
+            path = _get_earliest_asset_path(ds_by_id[earliest_dandiset_id], paths, asset_created_cache)  # type: ignore[arg-type]
 
         cache[content_id] = {earliest_dandiset_id: path}
 
@@ -169,13 +130,14 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         paths = [str(p) for p in paths_raw]
 
         # Skip if the dandiset has been deleted.
-        if _get_dandiset_created(dandiset_id, dandiset_created_cache) is None:
+        dandiset = _get_dandiset(client, dandiset_id, dandiset_cache)
+        if dandiset is None:
             print(
-                f"  Warning: dandiset {dandiset_id} for content_id={content_id!r} not found (404), skipping", flush=True
+                f"  Warning: dandiset {dandiset_id} for content_id={content_id!r} not found, skipping", flush=True
             )
             continue
 
-        path = _get_earliest_asset_path(dandiset_id, paths, asset_created_cache)
+        path = _get_earliest_asset_path(dandiset, paths, asset_created_cache)
         cache[content_id] = {dandiset_id: path}
 
     output_file_path = base_directory / "derivatives" / "content_id_to_usage_dandiset_path.yaml"
