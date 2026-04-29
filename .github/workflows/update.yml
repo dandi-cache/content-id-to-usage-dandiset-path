@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 0 * * *"  # TODO: set the desired schedule
   workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to checkout and push updates to (use this instead of the default GitHub branch dropdown, which does not list copilot/** branches)"
+        required: false
+        default: "main"
 
 jobs:
   Update:
@@ -16,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets._GITHUB_API_KEY }}
+          ref: ${{ inputs.branch }}
 
       - name: Configure git
         run: |
