@@ -57,7 +57,11 @@ def _get_dandiset_created(dandiset_id: str, cache: dict[str, datetime | None]) -
 
 
 def _get_earliest_asset_path(dandiset_id: str, paths: list[str], cache: dict[tuple[str, str], datetime | None]) -> str:
-    """Return the path from *paths* whose asset was created earliest in *dandiset_id*."""
+    """Return the path from *paths* whose asset was created earliest in *dandiset_id*.
+
+    Falls back to the first path if the dandiset no longer exists (404) or no
+    asset timestamps can be retrieved.
+    """
     padded = dandiset_id.zfill(6)
     earliest_path = paths[0]
     earliest_created: datetime | None = None
@@ -65,16 +69,23 @@ def _get_earliest_asset_path(dandiset_id: str, paths: list[str], cache: dict[tup
     for path in paths:
         key = (dandiset_id, path)
         if key not in cache:
-            data = _get(
-                f"{DANDI_API_BASE}/dandisets/{padded}/versions/draft/assets/",
-                params={"path": path},
-            )
-            results = data.get("results", [])
-            if results:
-                created_str = results[0]["created"]
-                cache[key] = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
-            else:
-                cache[key] = None
+            try:
+                data = _get(
+                    f"{DANDI_API_BASE}/dandisets/{padded}/versions/draft/assets/",
+                    params={"path": path},
+                )
+                results = data.get("results", [])
+                if results:
+                    created_str = results[0]["created"]
+                    cache[key] = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+                else:
+                    cache[key] = None
+            except requests.HTTPError as exc:
+                if exc.response is not None and exc.response.status_code == 404:
+                    print(f"  Warning: 404 fetching assets for dandiset {dandiset_id}, path {path!r}", flush=True)
+                    cache[key] = None
+                else:
+                    raise
 
         created = cache[key]
         if created is not None and (earliest_created is None or created < earliest_created):
@@ -156,6 +167,11 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         dandiset_id, paths_raw = next(iter(dandisets.items()))
         dandiset_id = str(dandiset_id)
         paths = [str(p) for p in paths_raw]
+
+        # Skip if the dandiset has been deleted.
+        if _get_dandiset_created(dandiset_id, dandiset_created_cache) is None:
+            print(f"  Warning: dandiset {dandiset_id} for content_id={content_id!r} not found (404), skipping", flush=True)
+            continue
 
         path = _get_earliest_asset_path(dandiset_id, paths, asset_created_cache)
         cache[content_id] = {dandiset_id: path}
