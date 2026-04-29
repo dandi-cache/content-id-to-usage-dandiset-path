@@ -1,9 +1,10 @@
-# DANDI Cache: `content-id-to-usage-dandiset-path`
+# DANDI Cache: Content ID → 'Usage' Dandiset paths
 
 A one-to-one mapping from content IDs to a single (dandiset ID, asset path) pair, resolved from the non-unique entries in [`dandi-cache/content-id-to-unique-dandiset-path`](https://github.com/dandi-cache/content-id-to-unique-dandiset-path).
 
-Entries from `multiple_dandisets.yaml` are resolved by selecting the dandiset that came into existence first.
-Entries from `multiple_paths_same_dandiset.yaml` are resolved by selecting the asset path that was created first.
+This approach is entirely heuristic, is technically 'not true', but is also not any more false than what we have currently anyhow.
+
+This cache may be retired when or if fully audit tracking or watermark enforcement is ever fully integrated.
 
 Updated frequently.
 
