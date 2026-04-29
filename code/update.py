@@ -7,22 +7,6 @@ from dandi.dandiapi import DandiAPIClient, RemoteDandiset
 from dandi.exceptions import NotFoundError
 
 
-def _get_dandiset(
-    client: DandiAPIClient, dandiset_id: str, cache: dict[str, RemoteDandiset | None]
-) -> RemoteDandiset | None:
-    """Return a RemoteDandiset for *dandiset_id*, or None if the dandiset no longer exists."""
-    if dandiset_id not in cache:
-        try:
-            dandiset = client.get_dandiset(dandiset_id)
-            # Access .created to trigger the lazy load and detect a missing dandiset early.
-            _ = dandiset.created
-            cache[dandiset_id] = dandiset
-        except NotFoundError:
-            print(f"  Warning: dandiset {dandiset_id} not found, skipping", flush=True)
-            cache[dandiset_id] = None
-    return cache[dandiset_id]
-
-
 def _get_earliest_asset_path(
     dandiset: RemoteDandiset,
     paths: list[str],
@@ -80,10 +64,19 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         multiple_paths_same_dandiset: dict = yaml.safe_load(file_stream) or {}
 
     content_id_to_dandiset_path: dict[str, dict[str, str]] = {}
-    dandiset_cache: dict[str, RemoteDandiset | None] = {}
     asset_created_cache: dict[tuple[str, str], datetime | None] = {}
 
     client = DandiAPIClient()
+
+    # One initial pass over all dandisets to collect creation times.
+    # Dandisets that have been deleted will simply be absent from this mapping.
+    print("Fetching all dandiset creation times...", flush=True)
+    dandiset_created: dict[str, datetime] = {}
+    dandiset_by_id: dict[str, RemoteDandiset] = {}
+    for dandiset in client.get_dandisets():
+        dandiset_by_id[dandiset.identifier] = dandiset
+        dandiset_created[dandiset.identifier] = dandiset.created
+    print(f"  Found {len(dandiset_created)} dandisets", flush=True)
 
     # Resolve entries where the same content-ID appears in multiple dandisets.
     # Heuristic: prefer the dandiset that came into existence first.
@@ -96,23 +89,19 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         # PyYAML may parse numeric keys as integers, so normalize to strings.
         normalized: dict[str, list[str]] = {str(k): [str(p) for p in v] for k, v in dandisets.items()}
 
-        # Resolve dandiset objects; exclude dandisets that have been deleted.
-        ds_by_id = {d: _get_dandiset(client, d, dandiset_cache) for d in normalized}
-        available = {d: paths for d, paths in normalized.items() if ds_by_id[d] is not None}
+        # Exclude dandisets that have been deleted (absent from the upfront pass).
+        available = {d: paths for d, paths in normalized.items() if d in dandiset_created}
         if not available:
             print(f"  Warning: all dandisets for content_id={content_id!r} not found, skipping", flush=True)
             continue
 
-        earliest_dandiset_id = min(
-            available.keys(),
-            key=lambda d: ds_by_id[d].created,  # type: ignore[union-attr]
-        )
+        earliest_dandiset_id = min(available.keys(), key=lambda d: dandiset_created[d])
 
         paths: list[str] = available[earliest_dandiset_id]
         if len(paths) == 1:
             path = paths[0]
         else:
-            path = _get_earliest_asset_path(ds_by_id[earliest_dandiset_id], paths, asset_created_cache)  # type: ignore[arg-type]
+            path = _get_earliest_asset_path(dandiset_by_id[earliest_dandiset_id], paths, asset_created_cache)
 
         content_id_to_dandiset_path[content_id] = {earliest_dandiset_id: path}
 
@@ -130,12 +119,11 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
         paths = [str(p) for p in paths_raw]
 
         # Skip if the dandiset has been deleted.
-        dandiset = _get_dandiset(client, dandiset_id, dandiset_cache)
-        if dandiset is None:
+        if dandiset_id not in dandiset_created:
             print(f"  Warning: dandiset {dandiset_id} for content_id={content_id!r} not found, skipping", flush=True)
             continue
 
-        path = _get_earliest_asset_path(dandiset, paths, asset_created_cache)
+        path = _get_earliest_asset_path(dandiset_by_id[dandiset_id], paths, asset_created_cache)
         content_id_to_dandiset_path[content_id] = {dandiset_id: path}
 
     output_file_path = base_directory / "derivatives" / "content_id_to_usage_dandiset_path.yaml"
