@@ -170,7 +170,9 @@ def _run(base_directory: pathlib.Path, input_directory: pathlib.Path, /) -> None
 
         # Skip if the dandiset has been deleted.
         if _get_dandiset_created(dandiset_id, dandiset_created_cache) is None:
-            print(f"  Warning: dandiset {dandiset_id} for content_id={content_id!r} not found (404), skipping", flush=True)
+            print(
+                f"  Warning: dandiset {dandiset_id} for content_id={content_id!r} not found (404), skipping", flush=True
+            )
             continue
 
         path = _get_earliest_asset_path(dandiset_id, paths, asset_created_cache)
