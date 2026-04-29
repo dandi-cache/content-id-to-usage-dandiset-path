@@ -1,6 +1,10 @@
-# DANDI Cache: `<cache-name>`
+# DANDI Cache: Content ID → 'Usage' Dandiset paths
 
-`<A short description of what this cache contains and how it is derived.>`
+A one-to-one mapping from content IDs to a single (dandiset ID, asset path) pair, resolved from the non-unique entries in [`dandi-cache/content-id-to-unique-dandiset-path`](https://github.com/dandi-cache/content-id-to-unique-dandiset-path).
+
+This approach is entirely heuristic, is technically 'not true', but is also not 'any more false' than what we currently have.
+
+This cache may be retired when or if fully audit tracking or watermark enforcement is ever fully integrated.
 
 Updated frequently.
 
@@ -12,8 +16,6 @@ Primarily for use by developers.
 
 If you only plan to use this cache infrequently or from disparate locations, you can directly download the latest version of the cache as a minified and compressed JSON file:
 
-> **Note:** Throughout this template, `<cache-name>` refers to the hyphenated repository name (e.g., `my-cache`) and `<cache_name>` refers to the underscored form used for file and variable names (e.g., `my_cache`).
-
 ### Python API (recommended)
 
 ```python
@@ -22,15 +24,15 @@ import json
 
 import requests
 
-url = "https://raw.githubusercontent.com/dandi-cache/<cache-name>/refs/heads/min/derivatives/<cache_name>.min.json.gz"
+url = "https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/min/derivatives/content_id_to_usage_dandiset_path.min.json.gz"
 response = requests.get(url)
-<cache_name> = json.loads(gzip.decompress(data=response.content))
+content_id_to_usage_dandiset_path = json.loads(gzip.decompress(data=response.content))
 ```
 
 ### Save to file
 
 ```bash
-curl https://raw.githubusercontent.com/dandi-cache/<cache-name>/refs/heads/min/derivatives/<cache_name>.min.json.gz -o <cache_name>.min.json.gz
+curl https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/min/derivatives/content_id_to_usage_dandiset_path.min.json.gz -o content_id_to_usage_dandiset_path.min.json.gz
 ```
 
 
@@ -40,7 +42,7 @@ curl https://raw.githubusercontent.com/dandi-cache/<cache-name>/refs/heads/min/d
 If you plan on using this cache regularly, clone this repository:
 
 ```bash
-git clone https://github.com/dandi-cache/<cache-name>.git
+git clone https://github.com/dandi-cache/content-id-to-usage-dandiset-path.git
 ```
 
 Then set up a CRON on your system to pull the latest version of the cache at your desired frequency.
@@ -48,7 +50,7 @@ Then set up a CRON on your system to pull the latest version of the cache at you
 For example, through `crontab -e`, add:
 
 ```bash
-0 0 * * * git -C /path/to/<cache-name> pull
+0 0 * * * git -C /path/to/content-id-to-usage-dandiset-path pull
 ```
 
 This will minimize data overhead by only loading the most recent changes.
