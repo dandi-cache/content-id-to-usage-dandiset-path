@@ -1,6 +1,6 @@
 # DANDI Cache: `content-id-to-usage-dandiset-path`
 
-A one-to-one mapping from content IDs to a single (dandiset ID, asset path) pair, resolved from the non-unique entries in [`dandi-cache/content-id-to-unique-dandiset-path`](https://github.com/dandi-cache/content-id-to-unique-dandiset-path).
+A one-to-one mapping from content IDs to a single (dandiset ID, asset path) pair, resolved from the multi-valued entries in [`dandi-cache/content-id-to-dandiset-paths`](https://github.com/dandi-cache/content-id-to-dandiset-paths).
 
 When a content ID maps to multiple dandisets, the dandiset that came into existence first is preferred; when it maps to multiple paths within one dandiset, the asset path that was created first is preferred. This approach is entirely heuristic, is technically 'not true', but is also not 'any more false' than what we currently have.
 
@@ -78,7 +78,7 @@ This cache uses three branches:
 - **`derivatives`** is a persistent [DataLad](https://www.datalad.org/) dataset on its own branch. Each update is recorded there with `datalad containers-run`, so every revision carries full provenance of the exact command, the input subdataset commit, the output diff, and the runtime container image digest.
 - **`dist`** is the lightweight publication artifact consumed by downstream users and preferred for one-time downloads.
 
-The input is the [`dandi-cache/content-id-to-unique-dandiset-path`](https://github.com/dandi-cache/content-id-to-unique-dandiset-path) cache, registered as an input subdataset under `sourcedata/` in the `derivatives` dataset and pinned in the provenance of every run. The update logic additionally queries the [DANDI Archive](https://dandiarchive.org/) API at run time to resolve the non-unique entries (dandiset and asset creation times).
+The input is the [`dandi-cache/content-id-to-dandiset-paths`](https://github.com/dandi-cache/content-id-to-dandiset-paths) cache (its `derivatives` branch), registered as an input subdataset under `sourcedata/` in the `derivatives` dataset and pinned in the provenance of every run. The update logic additionally queries the [DANDI Archive](https://dandiarchive.org/) API at run time to resolve the non-unique entries (dandiset and asset creation times).
 
 The processing runs inside a published container image (`ghcr.io/dandi-cache/content-id-to-usage-dandiset-path:latest`) that holds only the pinned runtime environment.
 

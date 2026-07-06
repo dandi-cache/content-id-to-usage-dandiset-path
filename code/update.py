@@ -5,7 +5,6 @@ import pathlib
 
 import dandi.dandiapi
 import dandi.exceptions
-import yaml
 
 
 def _get_earliest_asset_path(
@@ -49,24 +48,40 @@ def _get_earliest_asset_path(
 
 def _run(base_directory: pathlib.Path) -> None:
     """Resolve non-unique content-ID mappings and write a one-to-one output mapping."""
-    input_directory_path = base_directory / "sourcedata" / "content-id-to-unique-dandiset-path" / "derivatives"
+    input_file_path = (
+        base_directory
+        / "sourcedata"
+        / "content-id-to-dandiset-paths"
+        / "derivatives"
+        / "content_id_to_dandiset_paths.jsonl"
+    )
+    if not input_file_path.exists():
+        raise FileNotFoundError(f"Input file not found: {input_file_path}")
 
-    content_id_to_unique_dandiset_path_file_path = input_directory_path / "content_id_to_unique_dandiset_path.yaml"
-    multiple_dandisets_file_path = input_directory_path / "multiple_dandisets.yaml"
-    multiple_paths_file_path = input_directory_path / "multiple_paths_same_dandiset.yaml"
+    # Each line is a single-entry mapping of {content_id: {dandiset_id: [paths, ...]}}.
+    content_id_to_dandiset_paths: dict[str, dict[str, list[str]]] = {}
+    with input_file_path.open(mode="r") as file_stream:
+        for line in file_stream:
+            content_id_to_dandiset_paths.update(json.loads(line))
 
-    for path in (content_id_to_unique_dandiset_path_file_path, multiple_dandisets_file_path, multiple_paths_file_path):
-        if not path.exists():
-            raise FileNotFoundError(f"Input file not found: {path}")
+    # Split the entries into the already-unique mappings and the two non-unique cases.
+    content_id_to_usage_dandiset_path: dict[str, dict[str, str]] = {}
+    multiple_dandisets: dict[str, dict[str, list[str]]] = {}
+    multiple_paths_same_dandiset: dict[str, dict[str, list[str]]] = {}
+    for content_id, dandisets in content_id_to_dandiset_paths.items():
+        if not dandisets:
+            raise ValueError(f"Empty dandisets mapping for content_id={content_id!r}")
+        if len(dandisets) > 1:
+            multiple_dandisets[content_id] = dandisets
+            continue
 
-    with content_id_to_unique_dandiset_path_file_path.open(mode="r") as file_stream:
-        content_id_to_unique_dandiset_path: dict[str, dict[str, str]] = yaml.safe_load(file_stream) or {}
-    with multiple_dandisets_file_path.open(mode="r") as file_stream:
-        multiple_dandisets: dict = yaml.safe_load(file_stream) or {}
-    with multiple_paths_file_path.open(mode="r") as file_stream:
-        multiple_paths_same_dandiset: dict = yaml.safe_load(file_stream) or {}
+        dandiset_id, paths = next(iter(dandisets.items()))
+        if len(paths) > 1:
+            multiple_paths_same_dandiset[content_id] = {dandiset_id: paths}
+            continue
 
-    content_id_to_usage_dandiset_path: dict[str, dict[str, str]] = content_id_to_unique_dandiset_path
+        content_id_to_usage_dandiset_path[content_id] = {dandiset_id: paths[0]}
+
     asset_created_cache: dict[tuple[str, str], datetime.datetime | None] = {}
     resolution_failures: list[str] = []
     dandiset_failures: list[str] = []
@@ -90,12 +105,8 @@ def _run(base_directory: pathlib.Path) -> None:
         if idx % 100 == 0:
             print(f"  {idx}/{len(multiple_dandisets)}", flush=True)
 
-        # dandisets is a dict of {dandiset_id: [list of paths]}.
-        # PyYAML may parse numeric keys as integers, so normalize to strings.
-        normalized: dict[str, list[str]] = {str(k): [str(p) for p in v] for k, v in dandisets.items()}
-
         # Exclude dandisets that have been deleted (absent from the upfront pass).
-        available = {d: paths for d, paths in normalized.items() if d in dandiset_created_on}
+        available = {d: paths for d, paths in dandisets.items() if d in dandiset_created_on}
         if not available:
             dandiset_failures.append(f"No dandiset found for content_id={content_id!r}")
             continue
@@ -123,11 +134,7 @@ def _run(base_directory: pathlib.Path) -> None:
         if idx % 100 == 0:
             print(f"  {idx}/{len(multiple_paths_same_dandiset)}", flush=True)
 
-        if not dandisets:
-            raise ValueError(f"Empty dandisets mapping for content_id={content_id!r}")
-        dandiset_id, paths_raw = next(iter(dandisets.items()))
-        dandiset_id = str(dandiset_id)
-        paths = [str(p) for p in paths_raw]
+        dandiset_id, paths = next(iter(dandisets.items()))
 
         # Skip if the dandiset has been deleted.
         if dandiset_id not in dandiset_created_on:
@@ -144,8 +151,8 @@ def _run(base_directory: pathlib.Path) -> None:
         content_id_to_usage_dandiset_path[content_id] = {dandiset_id: path}
 
     records = [
-        {"content_id": str(content_id), "dandiset_id": str(dandiset_id), "path": str(path)}
-        for content_id, mapping in sorted(content_id_to_usage_dandiset_path.items(), key=lambda item: str(item[0]))
+        {"content_id": content_id, "dandiset_id": dandiset_id, "path": path}
+        for content_id, mapping in sorted(content_id_to_usage_dandiset_path.items())
         for dandiset_id, path in mapping.items()
     ]
 

@@ -37,19 +37,19 @@ BOT_NAME="github-actions[bot]"
 BOT_EMAIL="github-actions[bot]@users.noreply.github.com"
 
 # Input mode: upstream DataLad dataset (input subdataset). The upstream
-# content-id-to-unique-dandiset-path cache is registered as an input subdataset: it is cloned
-# into the derivatives dataset and pinned in the provenance of every run via `--input`, so
-# each result records the exact input commit it was computed from. That upstream cache still
-# publishes its full YAML derivatives on its `main` branch, so that is the branch tracked
-# here; it is recorded in `.gitmodules` so `submodule update --remote` follows it on every
-# run.
+# content-id-to-dandiset-paths cache is registered as an input subdataset: it is cloned into
+# the derivatives dataset and pinned in the provenance of every run via `--input`, so each
+# result records the exact input commit it was computed from. That cache publishes its data
+# on its `derivatives` branch (its default branch holds only code), which is the branch
+# tracked here; it is recorded in `.gitmodules` so `submodule update --remote` follows it on
+# every run.
 #
 # NOTE: although the primary input is the pinned subdataset, update.py also queries the DANDI
 # API at run time to resolve the non-unique entries, so the processing container REQUIRES
 # outbound network access; the `--call-fmt` below must not isolate the network.
-INPUT_SUBDATASET_URL="https://github.com/dandi-cache/content-id-to-unique-dandiset-path.git"
-INPUT_SUBDATASET_PATH="sourcedata/content-id-to-unique-dandiset-path"
-INPUT_SUBDATASET_BRANCH="main"
+INPUT_SUBDATASET_URL="https://github.com/dandi-cache/content-id-to-dandiset-paths.git"
+INPUT_SUBDATASET_PATH="sourcedata/content-id-to-dandiset-paths"
+INPUT_SUBDATASET_BRANCH="derivatives"
 
 DS="${RUNNER_TEMP:-/tmp}/derivatives-dataset"
 DISTDIR="${RUNNER_TEMP:-/tmp}/dist-publish"
