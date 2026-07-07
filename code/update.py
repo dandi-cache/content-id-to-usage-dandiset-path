@@ -1,9 +1,15 @@
 import argparse
+import concurrent.futures
 import datetime
+import functools
 import itertools
 import json
 import pathlib
 
+import boto3
+import botocore
+import botocore.config
+import botocore.exceptions
 import dandi.dandiapi
 import dandi.exceptions
 
@@ -14,6 +20,81 @@ import dandi.exceptions
 _TESTING_LIMIT = 10
 _CACHE_FILE_NAME = "content_id_to_usage_dandiset_path.jsonl"
 _TESTING_FILE_NAME = "testing.jsonl"
+
+# Dandiset creation times come from the public DANDI S3 bucket, not the REST API. Each
+# dandiset publishes a `dandiset.jsonld` manifest whose `dateCreated` is the creation time,
+# and reading it directly recovers dandisets that the API's dandiset-listing endpoint omits
+# even though they still exist (e.g. 000403, 000561), which the listing-based approach dropped.
+#
+# Asset creation times are NOT published in the S3 manifests: `assets.jsonld` carries
+# `dateModified` / `blobDateModified` / `datePublished`, but not the asset's `created`
+# timestamp. So the per-asset tie-break (multiple paths within one dandiset) still queries the
+# REST API. The container therefore requires outbound network access to both S3 and the API.
+_BUCKET = "dandiarchive"
+_REGION = "us-east-2"
+_DANDISET_MANIFEST_KEY = "dandisets/{dandiset_id}/draft/dandiset.jsonld"
+
+
+def _build_s3_client(max_pool_connections: int) -> "botocore.client.BaseClient":
+    # `dandiarchive` is a public bucket, so requests are sent unsigned (anonymous). The
+    # connection pool holds one connection per worker so the surplus workers do not redo the
+    # TCP/TLS handshake on every request.
+    config = botocore.config.Config(
+        signature_version=botocore.UNSIGNED,
+        max_pool_connections=max_pool_connections,
+        retries={"mode": "standard"},
+    )
+    return boto3.client("s3", region_name=_REGION, config=config)
+
+
+def _get_dandiset_created(s3_client: "botocore.client.BaseClient", dandiset_id: str) -> datetime.datetime | None:
+    """Return the dandiset's creation time from its S3 `dandiset.jsonld`, or None if unavailable."""
+    key = _DANDISET_MANIFEST_KEY.format(dandiset_id=dandiset_id)
+    try:
+        response = s3_client.get_object(Bucket=_BUCKET, Key=key)
+    except botocore.exceptions.ClientError as error:
+        error_code = error.response.get("Error", {}).get("Code", "")
+        # A deleted dandiset has no manifest (NoSuchKey); an embargoed one denies anonymous
+        # reads (AccessDenied). Both mean the dandiset cannot be placed in time, so it is
+        # treated as absent, exactly as a deleted dandiset was under the listing-based pass.
+        if error_code in ("AccessDenied", "NoSuchKey"):
+            return None
+        raise
+    body = response["Body"].read()
+    metadata = json.loads(body) if body.strip() else {}
+
+    date_created = metadata.get("dateCreated")
+    if date_created is None:
+        return None
+    return datetime.datetime.fromisoformat(date_created)
+
+
+def _collect_dandiset_created_on(
+    s3_client: "botocore.client.BaseClient", dandiset_ids: set[str], max_workers: int
+) -> dict[str, datetime.datetime]:
+    """Fetch creation times for the given dandiset IDs concurrently; omit those without one."""
+    ordered_ids = sorted(dandiset_ids)
+    get_created = functools.partial(_get_dandiset_created, s3_client)
+    created_on: dict[str, datetime.datetime] = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for dandiset_id, created in zip(ordered_ids, executor.map(get_created, ordered_ids)):
+            if created is not None:
+                created_on[dandiset_id] = created
+    return created_on
+
+
+def _get_remote_dandiset(
+    client: dandi.dandiapi.DandiAPIClient,
+    dandiset_id: str,
+    remote_dandiset_cache: dict[str, dandi.dandiapi.RemoteDandiset | None],
+) -> dandi.dandiapi.RemoteDandiset | None:
+    """Return the API's RemoteDandiset for asset lookups, or None if the API cannot resolve it."""
+    if dandiset_id not in remote_dandiset_cache:
+        try:
+            remote_dandiset_cache[dandiset_id] = client.get_dandiset(dandiset_id)
+        except dandi.exceptions.NotFoundError:
+            remote_dandiset_cache[dandiset_id] = None
+    return remote_dandiset_cache[dandiset_id]
 
 
 def _get_earliest_asset_path(
@@ -55,7 +136,39 @@ def _get_earliest_asset_path(
     return earliest_path
 
 
-def _run(base_directory: pathlib.Path, testing: bool) -> None:
+def _resolve_earliest_path(
+    *,
+    client: dandi.dandiapi.DandiAPIClient,
+    dandiset_id: str,
+    paths: list[str],
+    remote_dandiset_cache: dict[str, dandi.dandiapi.RemoteDandiset | None],
+    asset_created_cache: dict[tuple[str, str], datetime.datetime | None],
+    resolution_failures: list[str],
+    processing_step: str,
+) -> str:
+    """Pick the earliest-created path among *paths*, falling back to the first path."""
+    if len(paths) == 1:
+        return paths[0]
+
+    remote_dandiset = _get_remote_dandiset(client, dandiset_id, remote_dandiset_cache)
+    if remote_dandiset is None:
+        # The dandiset has a creation time from S3 but the REST API cannot resolve its assets
+        # (e.g. it is absent from the API), so the tie-break falls back to the first path.
+        resolution_failures.append(
+            f"Dandiset not resolvable via API: dandiset_id={dandiset_id!r}, " f"processing_step={processing_step!r}"
+        )
+        return paths[0]
+
+    return _get_earliest_asset_path(
+        dandiset=remote_dandiset,
+        paths=paths,
+        asset_created_cache=asset_created_cache,
+        resolution_failures=resolution_failures,
+        processing_step=processing_step,
+    )
+
+
+def _run(base_directory: pathlib.Path, testing: bool, max_workers: int) -> None:
     """Resolve non-unique content-ID mappings and write a one-to-one output mapping."""
     input_file_path = (
         base_directory
@@ -93,9 +206,8 @@ def _run(base_directory: pathlib.Path, testing: bool) -> None:
 
     if testing:
         # Testing run: keep only the first few entries of each category, so the run is fast
-        # but still exercises the passthrough and both resolution heuristics. The upfront
-        # dandiset pass below still runs in full (it is required for resolution and is the
-        # genuine DANDI API interaction being smoke-tested).
+        # but still exercises the passthrough and both resolution heuristics. The dandiset and
+        # asset lookups below are then scoped to just those entries.
         content_id_to_usage_dandiset_path = dict(
             itertools.islice(content_id_to_usage_dandiset_path.items(), _TESTING_LIMIT)
         )
@@ -103,20 +215,25 @@ def _run(base_directory: pathlib.Path, testing: bool) -> None:
         multiple_paths_same_dandiset = dict(itertools.islice(multiple_paths_same_dandiset.items(), _TESTING_LIMIT))
 
     asset_created_cache: dict[tuple[str, str], datetime.datetime | None] = {}
+    remote_dandiset_cache: dict[str, dandi.dandiapi.RemoteDandiset | None] = {}
     resolution_failures: list[str] = []
     dandiset_failures: list[str] = []
 
     client = dandi.dandiapi.DandiAPIClient()
 
-    # One initial pass over all dandisets to collect creation times.
-    # Dandisets that have been deleted will simply be absent from this mapping.
-    print("Fetching all dandiset creation times...", flush=True)
-    dandiset_created_on: dict[str, datetime.datetime] = {}
-    dandiset_by_id: dict[str, dandi.dandiapi.RemoteDandiset] = {}
-    for dandiset in client.get_dandisets():
-        dandiset_by_id[dandiset.identifier] = dandiset
-        dandiset_created_on[dandiset.identifier] = dandiset.created
-    print(f"  Found {len(dandiset_created_on)} dandisets", flush=True)
+    # Collect creation times only for the dandisets actually referenced by the non-unique
+    # entries (the already-unique passthrough needs none), read from their S3 dandiset.jsonld.
+    # Dandisets that have been deleted are simply absent from this mapping.
+    referenced_dandiset_ids: set[str] = set()
+    for dandisets in multiple_dandisets.values():
+        referenced_dandiset_ids.update(dandisets.keys())
+    for dandisets in multiple_paths_same_dandiset.values():
+        referenced_dandiset_ids.update(dandisets.keys())
+
+    print(f"Fetching creation times for {len(referenced_dandiset_ids)} dandisets from S3...", flush=True)
+    s3_client = _build_s3_client(max_pool_connections=max_workers)
+    dandiset_created_on = _collect_dandiset_created_on(s3_client, referenced_dandiset_ids, max_workers=max_workers)
+    print(f"  Resolved {len(dandiset_created_on)} dandiset creation times", flush=True)
 
     # Resolve entries where the same content-ID appears in multiple dandisets.
     # Heuristic: prefer the dandiset that came into existence first.
@@ -125,7 +242,7 @@ def _run(base_directory: pathlib.Path, testing: bool) -> None:
         if idx % 100 == 0:
             print(f"  {idx}/{len(multiple_dandisets)}", flush=True)
 
-        # Exclude dandisets that have been deleted (absent from the upfront pass).
+        # Exclude dandisets that have been deleted (no creation time from S3).
         available = {d: paths for d, paths in dandisets.items() if d in dandiset_created_on}
         if not available:
             dandiset_failures.append(f"No dandiset found for content_id={content_id!r}")
@@ -133,18 +250,15 @@ def _run(base_directory: pathlib.Path, testing: bool) -> None:
 
         earliest_dandiset_id = min(available.keys(), key=lambda d: dandiset_created_on[d])
 
-        paths: list[str] = available[earliest_dandiset_id]
-        if len(paths) == 1:
-            path = paths[0]
-        else:
-            path = _get_earliest_asset_path(
-                dandiset=dandiset_by_id[earliest_dandiset_id],
-                paths=paths,
-                asset_created_cache=asset_created_cache,
-                resolution_failures=resolution_failures,
-                processing_step="dandiset came first",
-            )
-
+        path = _resolve_earliest_path(
+            client=client,
+            dandiset_id=earliest_dandiset_id,
+            paths=available[earliest_dandiset_id],
+            remote_dandiset_cache=remote_dandiset_cache,
+            asset_created_cache=asset_created_cache,
+            resolution_failures=resolution_failures,
+            processing_step="dandiset came first",
+        )
         content_id_to_usage_dandiset_path[content_id] = {earliest_dandiset_id: path}
 
     # Resolve entries where the same content-ID appears in multiple paths within one dandiset.
@@ -161,9 +275,11 @@ def _run(base_directory: pathlib.Path, testing: bool) -> None:
             dandiset_failures.append(f'Dandiset "{dandiset_id!r}" not found in `dandiset_created_on`!')
             continue
 
-        path = _get_earliest_asset_path(
-            dandiset=dandiset_by_id[dandiset_id],
+        path = _resolve_earliest_path(
+            client=client,
+            dandiset_id=dandiset_id,
             paths=paths,
+            remote_dandiset_cache=remote_dandiset_cache,
             asset_created_cache=asset_created_cache,
             resolution_failures=resolution_failures,
             processing_step="asset came first",
@@ -212,6 +328,12 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=16,
+        help="Number of concurrent workers used to fetch dandiset creation times from S3.",
+    )
+    parser.add_argument(
         "--testing",
         action="store_true",
         help=(
@@ -222,4 +344,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    _run(base_directory=args.base_directory, testing=args.testing)
+    _run(base_directory=args.base_directory, testing=args.testing, max_workers=args.max_workers)

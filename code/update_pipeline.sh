@@ -55,9 +55,10 @@ BOT_EMAIL="github-actions[bot]@users.noreply.github.com"
 # tracked here; it is recorded in `.gitmodules` so `submodule update --remote` follows it on
 # every run.
 #
-# NOTE: although the primary input is the pinned subdataset, update.py also queries the DANDI
-# API at run time to resolve the non-unique entries, so the processing container REQUIRES
-# outbound network access; the `--call-fmt` below must not isolate the network.
+# NOTE: although the primary input is the pinned subdataset, update.py also reads dandiset
+# creation times from the public DANDI S3 bucket and queries the DANDI REST API for asset
+# creation times at run time to resolve the non-unique entries, so the processing container
+# REQUIRES outbound network access; the `--call-fmt` below must not isolate the network.
 INPUT_SUBDATASET_URL="https://github.com/dandi-cache/content-id-to-dandiset-paths.git"
 INPUT_SUBDATASET_PATH="sourcedata/content-id-to-dandiset-paths"
 INPUT_SUBDATASET_BRANCH="derivatives"
