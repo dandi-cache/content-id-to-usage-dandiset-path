@@ -24,7 +24,10 @@
 #   WORKSPACE   Path to the `main` checkout that holds the code (this repository).
 #   IMAGE       Container image reference to run the processing in.
 # Optional:
-#   LIMIT        Batch size passed to update.py for incremental runs (default: 2000).
+#   TESTING      Set to "true" to run update.py in testing mode: it processes only a few
+#                entries of each category and reads/writes derivatives/testing.jsonl (and
+#                testing_-prefixed logs), leaving the real cache untouched. Empty/unset
+#                means a complete run.
 #   GITHUB_SHA   Recorded in the provenance message to link results to the code commit.
 #   RUNNER_TEMP  Scratch directory for the working clones (default: /tmp).
 set -euo pipefail
@@ -32,36 +35,31 @@ set -euo pipefail
 : "${REPO_URL:?REPO_URL must be set}"
 : "${WORKSPACE:?WORKSPACE must be set}"
 : "${IMAGE:?IMAGE must be set}"
-LIMIT="${LIMIT:-2000}"
+TESTING="${TESTING:-}"
 GITHUB_SHA="${GITHUB_SHA:-unknown}"
+
+# Only pass --testing when requested, so a normal run processes the full cache.
+TESTING_ARG=""
+if [ "${TESTING}" = "true" ]; then
+  TESTING_ARG="--testing"
+fi
 
 BOT_NAME="github-actions[bot]"
 BOT_EMAIL="github-actions[bot]@users.noreply.github.com"
 
-# TODO: pick this cache's input mode. There are three first-class cases:
+# Input mode: upstream DataLad dataset (input subdataset). The upstream
+# content-id-to-dandiset-paths cache is registered as an input subdataset: it is cloned into
+# the derivatives dataset and pinned in the provenance of every run via `--input`, so each
+# result records the exact input commit it was computed from. That cache publishes its data
+# on its `derivatives` branch (its default branch holds only code), which is the branch
+# tracked here; it is recorded in `.gitmodules` so `submodule update --remote` follows it on
+# every run.
 #
-#   1. Upstream DataLad dataset (input subdataset): set INPUT_SUBDATASET_URL to register an
-#      upstream dataset as an input subdataset. It is cloned into the derivatives dataset and
-#      pinned in the provenance of every run via `--input`, so each result records the exact
-#      input commit it was computed from. INPUT_SUBDATASET_BRANCH selects which branch of the
-#      input dataset to track: dandi-cache datasets publish their data on a dedicated branch
-#      (their default branch holds only code), so this defaults to `derivatives`; set it to
-#      whatever branch the upstream cache publishes to (e.g. `min`). It is recorded in
-#      `.gitmodules` so `submodule update --remote` follows that branch on every run.
-#   2. Local `sourcedata` directory: inputs live under the dataset's own `sourcedata/` (e.g.
-#      committed fixtures). Leave INPUT_SUBDATASET_URL empty; declare the relevant paths as
-#      `--input` below if you want them pinned in provenance.
-#   3. First-in-chain / no input dataset: this cache fetches its own inputs over the network
-#      at run time (e.g. queries a remote API or archive). Leave INPUT_SUBDATASET_URL empty.
-#      There is no input dataset to pin, so no `--input` provenance is declared. NOTE: the
-#      processing container therefore REQUIRES outbound network access at run time; the
-#      `--call-fmt` below must not isolate the network, and the runtime environment must
-#      allow the container to reach the upstream source.
-#
-# Leave INPUT_SUBDATASET_URL empty for cases 2 and 3; the subdataset handling below is then
-# skipped.
-INPUT_SUBDATASET_URL=""  # e.g. https://github.com/dandi-cache/<input-dataset-name>.git
-INPUT_SUBDATASET_PATH="sourcedata/<input-dataset-name>"
+# NOTE: although the primary input is the pinned subdataset, update.py also queries the DANDI
+# API at run time to resolve the non-unique entries, so the processing container REQUIRES
+# outbound network access; the `--call-fmt` below must not isolate the network.
+INPUT_SUBDATASET_URL="https://github.com/dandi-cache/content-id-to-dandiset-paths.git"
+INPUT_SUBDATASET_PATH="sourcedata/content-id-to-dandiset-paths"
 INPUT_SUBDATASET_BRANCH="derivatives"
 
 DS="${RUNNER_TEMP:-/tmp}/derivatives-dataset"
@@ -140,7 +138,10 @@ datalad save -m "Pin runtime container image to ${DIGEST}" .datalad
 # Fail fast if the dataset is not clean before the recorded run. `containers-run` requires a
 # clean tree to detect the command's changes and otherwise aborts with a generic "clean
 # dataset required" error; surfacing the offending paths here is far easier to diagnose.
-DATASET_STATUS=$(datalad status)
+# `git status --porcelain` is empty exactly when the tree is clean (`datalad status` cannot
+# be used as an emptiness test: it prints "nothing to save, working tree clean" on a clean
+# tree).
+DATASET_STATUS=$(git status --porcelain)
 if [ -n "${DATASET_STATUS}" ]; then
   echo "ERROR: derivatives dataset is not clean before containers-run." >&2
   echo "Offending paths:" >&2
@@ -150,34 +151,30 @@ fi
 
 # Run the processing inside the published image. The image provides only the environment;
 # the code and the dataset are bind-mounted in (see the call format). `--explicit` keeps
-# datalad from clearing the outputs first, which is required when the outputs are also prior
-# state (input) of the next incremental run.
-#
-# Input provenance depends on the input mode selected above: with an INPUT_SUBDATASET_URL the
-# subdataset is pinned via `--input`; in the first-in-chain / no-input-dataset mode there is
-# nothing to pin, so no `--input` is declared and the container fetches its own inputs over
-# the network (which therefore must be reachable from inside the container at run time).
-RUN_INPUT_ARGS=()
-if [ -n "${INPUT_SUBDATASET_URL}" ]; then
-  RUN_INPUT_ARGS=(--input "${INPUT_SUBDATASET_PATH}")
-fi
+# datalad from clearing the outputs first. The input subdataset is pinned via `--input`, so
+# every run records the exact upstream commit it was computed from; the DANDI API queries
+# made by update.py happen over the network from inside the container.
 datalad containers-run -n pipeline --explicit \
-  "${RUN_INPUT_ARGS[@]}" \
+  --input "${INPUT_SUBDATASET_PATH}" \
   --output derivatives \
-  -m "Update <cache-name> (code @ ${GITHUB_SHA}; image ${DIGEST})" \
-  "python /code/update.py --base-directory /tmp --limit ${LIMIT}"
+  -m "Update content-id-to-usage-dandiset-path (code @ ${GITHUB_SHA}; image ${DIGEST})" \
+  "python /code/update.py --base-directory /tmp ${TESTING_ARG}"
 
 # Publish the full results to the `derivatives` branch.
 git -C "${DS}" push "${REPO_URL}" HEAD:derivatives
 
-# Build and force-publish the consumer-facing `dist` artifact from a fresh repo.
+# Build and force-publish the consumer-facing `dist` artifact from a fresh repo. Only the real
+# cache is published; a testing.jsonl(.gz) left by a testing run never reaches consumers. (The
+# guard only matters when a testing run precedes the first ever complete run.)
 uv run --project "${WORKSPACE}/envs" python "${WORKSPACE}/code/compress.py" --base-directory "${DS}"
 mkdir -p "${DISTDIR}/derivatives"
-cp "${DS}"/derivatives/*.jsonl.gz "${DISTDIR}/derivatives/"
+if [ -f "${DS}/derivatives/content_id_to_usage_dandiset_path.jsonl.gz" ]; then
+  cp "${DS}/derivatives/content_id_to_usage_dandiset_path.jsonl.gz" "${DISTDIR}/derivatives/"
+fi
 cp "${WORKSPACE}/dataset_description.json" "${DISTDIR}/dataset_description.json"
 git -C "${DISTDIR}" init -q -b dist
 git -C "${DISTDIR}" config user.name "${BOT_NAME}"
 git -C "${DISTDIR}" config user.email "${BOT_EMAIL}"
 git -C "${DISTDIR}" add dataset_description.json derivatives
-git -C "${DISTDIR}" commit -q -m "Publish <cache-name>"
+git -C "${DISTDIR}" commit -q -m "Publish content-id-to-usage-dandiset-path"
 git -C "${DISTDIR}" push -f "${REPO_URL}" dist:dist
