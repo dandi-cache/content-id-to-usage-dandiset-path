@@ -116,10 +116,13 @@ mkdir -p derivatives
 cp "${WORKSPACE}/dataset_description.json" dataset_description.json
 datalad save -m "Update dataset_description.json" dataset_description.json
 
-# Advance the input subdataset to its latest commit and record the pointer.
+# Advance the input subdataset to its latest commit and record the pointer. The save must
+# address the superdataset explicitly with `-d .`: a bare path that is itself a subdataset
+# makes datalad delegate the save into that subdataset (whose own tree is clean), silently
+# recording nothing and leaving the advanced pointer uncommitted here.
 if [ -n "${INPUT_SUBDATASET_URL}" ]; then
   git submodule update --init --remote "${INPUT_SUBDATASET_PATH}"
-  datalad save -m "Update input subdataset to latest" "${INPUT_SUBDATASET_PATH}"
+  datalad save -d . -m "Update input subdataset to latest" "${INPUT_SUBDATASET_PATH}"
 fi
 
 # Pin the published image digest and register it as a container. Only the digest is stored
