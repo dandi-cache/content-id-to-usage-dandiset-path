@@ -8,6 +8,14 @@ on:
   schedule:
     - cron: "0 4 * * *"  # Run daily at 04:00 UTC, after the source cache has updated
   workflow_dispatch:
+    inputs:
+      testing:
+        # A testing run processes only a few entries of each category and reads/writes
+        # derivatives/testing.jsonl, so the real cache is never touched.
+        description: "Testing mode: process only a few entries of each category and write to derivatives/testing.jsonl instead of the real cache."
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -59,6 +67,9 @@ jobs:
         env:
           REPO_URL: https://x-access-token:${{ secrets._GITHUB_API_KEY }}@github.com/${{ github.repository }}.git
           WORKSPACE: ${{ github.workspace }}
+          # Empty for scheduled runs and "false" for plain manual runs (complete update);
+          # only "true" when testing mode is explicitly selected on workflow_dispatch.
+          TESTING: ${{ github.event.inputs.testing }}
           GITHUB_SHA: ${{ github.sha }}
           IMAGE: ghcr.io/dandi-cache/content-id-to-usage-dandiset-path:latest
         run: bash code/update_pipeline.sh

@@ -1,10 +1,19 @@
 import argparse
 import datetime
+import itertools
 import json
 import pathlib
 
 import dandi.dandiapi
 import dandi.exceptions
+
+# Testing mode processes only this many entries of each category (already-unique,
+# multiple-dandisets, multiple-paths) and writes to its own designated files
+# (`derivatives/testing.jsonl` and `testing_`-prefixed logs), leaving the real cache
+# untouched.
+_TESTING_LIMIT = 10
+_CACHE_FILE_NAME = "content_id_to_usage_dandiset_path.jsonl"
+_TESTING_FILE_NAME = "testing.jsonl"
 
 
 def _get_earliest_asset_path(
@@ -46,7 +55,7 @@ def _get_earliest_asset_path(
     return earliest_path
 
 
-def _run(base_directory: pathlib.Path) -> None:
+def _run(base_directory: pathlib.Path, testing: bool) -> None:
     """Resolve non-unique content-ID mappings and write a one-to-one output mapping."""
     input_file_path = (
         base_directory
@@ -81,6 +90,17 @@ def _run(base_directory: pathlib.Path) -> None:
             continue
 
         content_id_to_usage_dandiset_path[content_id] = {dandiset_id: paths[0]}
+
+    if testing:
+        # Testing run: keep only the first few entries of each category, so the run is fast
+        # but still exercises the passthrough and both resolution heuristics. The upfront
+        # dandiset pass below still runs in full (it is required for resolution and is the
+        # genuine DANDI API interaction being smoke-tested).
+        content_id_to_usage_dandiset_path = dict(
+            itertools.islice(content_id_to_usage_dandiset_path.items(), _TESTING_LIMIT)
+        )
+        multiple_dandisets = dict(itertools.islice(multiple_dandisets.items(), _TESTING_LIMIT))
+        multiple_paths_same_dandiset = dict(itertools.islice(multiple_paths_same_dandiset.items(), _TESTING_LIMIT))
 
     asset_created_cache: dict[tuple[str, str], datetime.datetime | None] = {}
     resolution_failures: list[str] = []
@@ -159,7 +179,8 @@ def _run(base_directory: pathlib.Path) -> None:
     derivatives_directory = base_directory / "derivatives"
     derivatives_directory.mkdir(parents=True, exist_ok=True)
 
-    output_file_path = derivatives_directory / "content_id_to_usage_dandiset_path.jsonl"
+    # Testing runs write to their own designated files, so the real cache is never touched.
+    output_file_path = derivatives_directory / (_TESTING_FILE_NAME if testing else _CACHE_FILE_NAME)
     print(f"Writing {len(records)} entries to {output_file_path}", flush=True)
     with output_file_path.open(mode="w") as file_stream:
         file_stream.writelines(f"{json.dumps(record)}\n" for record in records)
@@ -169,9 +190,10 @@ def _run(base_directory: pathlib.Path) -> None:
     # alongside the output for provenance.
     logs_directory = derivatives_directory / "logs"
     logs_directory.mkdir(parents=True, exist_ok=True)
-    with (logs_directory / "dandiset_failures.txt").open(mode="w") as file_stream:
+    log_file_prefix = "testing_" if testing else ""
+    with (logs_directory / f"{log_file_prefix}dandiset_failures.txt").open(mode="w") as file_stream:
         file_stream.writelines(f"{line}\n" for line in dandiset_failures)
-    with (logs_directory / "resolution_failures.txt").open(mode="w") as file_stream:
+    with (logs_directory / f"{log_file_prefix}resolution_failures.txt").open(mode="w") as file_stream:
         file_stream.writelines(f"{line}\n" for line in resolution_failures)
 
 
@@ -189,6 +211,15 @@ if __name__ == "__main__":
             "defaults to the repository root."
         ),
     )
+    parser.add_argument(
+        "--testing",
+        action="store_true",
+        help=(
+            f"Run in testing mode: process only the first {_TESTING_LIMIT} entries of each category "
+            f"and write `derivatives/{_TESTING_FILE_NAME}` (and `testing_`-prefixed logs) instead of "
+            "the real cache, leaving it untouched. Omit for a complete update."
+        ),
+    )
     args = parser.parse_args()
 
-    _run(base_directory=args.base_directory)
+    _run(base_directory=args.base_directory, testing=args.testing)
