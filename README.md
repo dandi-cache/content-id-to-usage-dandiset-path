@@ -33,7 +33,7 @@ content_id_to_usage_dandiset_path = [json.loads(line) for line in lines]
 Each line is a record of the form:
 
 ```json
-{"content_id": "...", "dandiset_id": "...", "path": "..."}
+{"<content_id>": {"<dandiset_id>": "<path>"}}
 ```
 
 ### Save to file

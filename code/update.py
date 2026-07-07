@@ -170,10 +170,10 @@ def _run(base_directory: pathlib.Path, testing: bool) -> None:
         )
         content_id_to_usage_dandiset_path[content_id] = {dandiset_id: path}
 
+    # One JSON value per line: `{"<content_id>": {"<dandiset_id>": "<path>"}}`.
     records = [
-        {"content_id": content_id, "dandiset_id": dandiset_id, "path": path}
-        for content_id, mapping in sorted(content_id_to_usage_dandiset_path.items())
-        for dandiset_id, path in mapping.items()
+        {content_id: content_id_to_usage_dandiset_path[content_id]}
+        for content_id in sorted(content_id_to_usage_dandiset_path)
     ]
 
     derivatives_directory = base_directory / "derivatives"
