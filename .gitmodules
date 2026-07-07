@@ -1,0 +1,4 @@
+[submodule "sourcedata/content-id-to-dandiset-paths"]
+	path = sourcedata/content-id-to-dandiset-paths
+	url = https://github.com/dandi-cache/content-id-to-dandiset-paths.git
+	datalad-url = https://github.com/dandi-cache/content-id-to-dandiset-paths.git
