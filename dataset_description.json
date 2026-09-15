@@ -1,0 +1,27 @@
+{
+    "Name": "content-id-to-usage-dandiset-path",
+    "BIDSVersion": "1.11.1",
+    "DatasetType": "study",
+    "License": "CC-BY-4.0",
+    "Authors": [
+        "Cody Baker"
+    ],
+    "ReferencesAndLinks": [
+        "https://github.com/dandi-cache/content-id-to-usage-dandiset-path"
+    ],
+    "SourceDatasets": [
+        {
+            "URL": "https://github.com/dandi-cache/content-id-to-dandiset-paths.git"
+        }
+    ],
+    "GeneratedBy": [
+        {
+            "Name": "dandi-cache-utils",
+            "CodeURL": "https://github.com/dandi-cache/dandi-cache-utils",
+            "Container": {
+                "ContainerType": "docker",
+                "ContainerTag": "ghcr.io/dandi-cache/content-id-to-usage-dandiset-path"
+            }
+        }
+    ]
+}
