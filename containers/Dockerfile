@@ -1,43 +1,23 @@
 # syntax=docker/dockerfile:1
 
-# The container is the project's pinned, reproducible runtime environment and the official way to run the pipeline.
-# The loose dependencies declared in envs/pyproject.toml are resolved fresh at build time, and the resulting image (by digest) is the lock.
-# As such, there is no lockfile in the repository to hold in sync.
-# uv is intentionally not used inside the image; it stays an outside-the-container convenience for running locally while debugging (see the README).
+# The pinned runtime environment for this cache.
 #
-# The image holds only the environment, not the code.
-# The code is supplied at run time (checked out or mounted), so a single image serves any revision of the code.
+# Everything shared comes from the base image: Debian, git-annex, the virtual environment, the
+# `dandi_cache_utils` library that `code/update.py` imports, and the vendored `update_pipeline.sh`
+# that CI extracts and runs on the runner.
 #
-# NeuroDebian trixie (Debian 13) is the base layer.
-# it provides Python and a recent git-annex-standalone, which DataLad requires for the annex-backed dataset and its provenance.
-FROM neurodebian:trixie
+# `:latest` already carries this cache's two processing dependencies, boto3 and the DANDI client,
+# through the library's `s3` and `archive` extras, so there is nothing to install here.
+#
+# The image holds only the environment, not this cache's code. The code is mounted at run time, so
+# a single image serves any revision of it.
+#
+# The container needs outbound network access at run time: it reads Dandiset manifests from the
+# public S3 bucket and resolves asset creation times through the DANDI REST API.
+FROM ghcr.io/dandi-cache/dandi-cache-utils:latest
 
 # The source label associates the image on the GitHub Container Registry with this repository.
 LABEL org.opencontainers.image.source="https://github.com/dandi-cache/content-id-to-usage-dandiset-path"
 LABEL org.opencontainers.image.description="The pinned runtime environment for the DANDI Cache content-id-to-usage-dandiset-path update pipeline."
-
-# git-annex (for DataLad / annex provenance), Python, and the basics for cloning and TLS.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        git \
-        git-annex-standalone \
-        python3 \
-        python3-pip \
-        python3-venv \
-    && rm -rf /var/lib/apt/lists/*
-
-ENV VIRTUAL_ENV=/opt/venv \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
-
-# Debian's system interpreter is externally managed (PEP 668), so install into a dedicated virtual environment rather than forcing pip with --break-system-packages.
-# this also keeps our dependencies cleanly separated from the apt-managed Python packages.
-RUN python3 -m venv "${VIRTUAL_ENV}"
-ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
-
-COPY envs/pyproject.toml /tmp/build/pyproject.toml
-RUN pip install /tmp/build \
-    && rm -rf /tmp/build
 
 CMD ["python", "--version"]

@@ -2,7 +2,8 @@
 
 A one-to-one mapping from content IDs to a single (dandiset ID, asset path) pair, resolved from the multi-valued entries in [`dandi-cache/content-id-to-dandiset-paths`](https://github.com/dandi-cache/content-id-to-dandiset-paths).
 
-When a content ID maps to multiple dandisets, the dandiset that came into existence first is preferred; when it maps to multiple paths within one dandiset, the asset path that was created first is preferred. This approach is entirely heuristic, is technically 'not true', but is also not 'any more false' than what we currently have.
+When a content ID maps to multiple dandisets, the dandiset that came into existence first is preferred; when it maps to multiple paths within one dandiset, the asset path that was created first is preferred.
+This approach is entirely heuristic, is technically 'not true', but is also not 'any more false' than what we currently have.
 
 This cache may be retired when or if full audit tracking or watermark enforcement is ever fully integrated.
 
@@ -77,3 +78,11 @@ The container image is the authoritative runtime, but you can recreate the envir
 ```bash
 uv run --project envs python code/update.py
 ```
+
+
+## How this cache is built
+
+The orchestration, the runtime library and the CI all come from elsewhere, so this repository holds only what is specific to this cache: `cache.toml` (what it is), `code/update.py` (the two resolution heuristics), `envs/pyproject.toml` (its dependencies, which the base image now supplies) and the schedule in `.github/workflows/update.yml`.
+
+The pipeline is [`dandi-cache-utils`](https://github.com/dandi-cache/dandi-cache-utils), vendored into the runtime image this cache is built `FROM`, and the workflows call the shared actions in [`dandi-cache-action`](https://github.com/dandi-cache/dandi-cache-action).
+A gap in any of them is fixed there, where every cache gets the fix, rather than worked around here.

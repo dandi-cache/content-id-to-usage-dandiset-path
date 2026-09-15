@@ -1,347 +1,165 @@
-import argparse
-import concurrent.futures
-import datetime
-import functools
+"""Update the content-id-to-usage-dandiset-path DANDI cache.
+
+Reduce the upstream `content-id-to-dandiset-paths` cache, where one content ID may appear in
+several Dandisets and under several paths, to a single `(dandiset ID, asset path)` per content ID.
+Two heuristics do the reducing, and both prefer whatever came into existence first:
+
+- a content ID in several Dandisets is attributed to the Dandiset created earliest;
+- several paths within one Dandiset are reduced to the asset created earliest.
+
+This is a pure filter over its input with nothing to resume, so it recomputes the whole mapping
+each run. Everything shared with the other caches -- argument parsing, logging, the batch cap, the
+output paths and testing mode -- comes from `dandi_cache_utils`.
+"""
+
 import itertools
-import json
-import pathlib
 
-import boto3
-import botocore
-import botocore.config
-import botocore.exceptions
-import dandi.dandiapi
 import dandi.exceptions
+import dandi_cache_utils as dandi_cache
 
-# Testing mode processes only this many entries of each category (already-unique,
-# multiple-dandisets, multiple-paths) and writes to its own designated files
-# (`derivatives/testing.jsonl` and `testing_`-prefixed logs), leaving the real cache
-# untouched.
-_TESTING_LIMIT = 10
-_CACHE_FILE_NAME = "content_id_to_usage_dandiset_path.jsonl"
-_TESTING_FILE_NAME = "testing.jsonl"
-
-# Dandiset creation times come from the public DANDI S3 bucket, not the REST API. Each
-# dandiset publishes a `dandiset.jsonld` manifest whose `dateCreated` is the creation time,
-# and reading it directly recovers dandisets that the API's dandiset-listing endpoint omits
-# even though they still exist (e.g. 000403, 000561), which the listing-based approach dropped.
-#
-# Asset creation times are NOT published in the S3 manifests: `assets.jsonld` carries
-# `dateModified` / `blobDateModified` / `datePublished`, but not the asset's `created`
-# timestamp. So the per-asset tie-break (multiple paths within one dandiset) still queries the
-# REST API. The container therefore requires outbound network access to both S3 and the API.
-_BUCKET = "dandiarchive"
-_REGION = "us-east-2"
-_DANDISET_MANIFEST_KEY = "dandisets/{dandiset_id}/draft/dandiset.jsonld"
+#: Sized together with the S3 client's connection pool, which is what the shared client does.
+MAX_WORKERS = 16
 
 
-def _build_s3_client(max_pool_connections: int) -> "botocore.client.BaseClient":
-    # `dandiarchive` is a public bucket, so requests are sent unsigned (anonymous). The
-    # connection pool holds one connection per worker so the surplus workers do not redo the
-    # TCP/TLS handshake on every request.
-    config = botocore.config.Config(
-        signature_version=botocore.UNSIGNED,
-        max_pool_connections=max_pool_connections,
-        retries={"mode": "standard"},
-    )
-    return boto3.client("s3", region_name=_REGION, config=config)
+def split_by_uniqueness(dandiset_paths: dict, /) -> tuple[dict, dict, dict]:
+    """Separate the entries that are already unique from the two kinds that are not."""
+    unique: dict[str, dict[str, str]] = {}
+    several_dandisets: dict[str, dict[str, list[str]]] = {}
+    several_paths: dict[str, dict[str, list[str]]] = {}
 
-
-def _get_dandiset_created(s3_client: "botocore.client.BaseClient", dandiset_id: str) -> datetime.datetime | None:
-    """Return the dandiset's creation time from its S3 `dandiset.jsonld`, or None if unavailable."""
-    key = _DANDISET_MANIFEST_KEY.format(dandiset_id=dandiset_id)
-    try:
-        response = s3_client.get_object(Bucket=_BUCKET, Key=key)
-    except botocore.exceptions.ClientError as error:
-        error_code = error.response.get("Error", {}).get("Code", "")
-        # A deleted dandiset has no manifest (NoSuchKey); an embargoed one denies anonymous
-        # reads (AccessDenied). Both mean the dandiset cannot be placed in time, so it is
-        # treated as absent, exactly as a deleted dandiset was under the listing-based pass.
-        if error_code in ("AccessDenied", "NoSuchKey"):
-            return None
-        raise
-    body = response["Body"].read()
-    metadata = json.loads(body) if body.strip() else {}
-
-    date_created = metadata.get("dateCreated")
-    if date_created is None:
-        return None
-    return datetime.datetime.fromisoformat(date_created)
-
-
-def _collect_dandiset_created_on(
-    s3_client: "botocore.client.BaseClient", dandiset_ids: set[str], max_workers: int
-) -> dict[str, datetime.datetime]:
-    """Fetch creation times for the given dandiset IDs concurrently; omit those without one."""
-    ordered_ids = sorted(dandiset_ids)
-    get_created = functools.partial(_get_dandiset_created, s3_client)
-    created_on: dict[str, datetime.datetime] = {}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for dandiset_id, created in zip(ordered_ids, executor.map(get_created, ordered_ids)):
-            if created is not None:
-                created_on[dandiset_id] = created
-    return created_on
-
-
-def _get_remote_dandiset(
-    client: dandi.dandiapi.DandiAPIClient,
-    dandiset_id: str,
-    remote_dandiset_cache: dict[str, dandi.dandiapi.RemoteDandiset | None],
-) -> dandi.dandiapi.RemoteDandiset | None:
-    """Return the API's RemoteDandiset for asset lookups, or None if the API cannot resolve it."""
-    if dandiset_id not in remote_dandiset_cache:
-        try:
-            remote_dandiset_cache[dandiset_id] = client.get_dandiset(dandiset_id)
-        except dandi.exceptions.NotFoundError:
-            remote_dandiset_cache[dandiset_id] = None
-    return remote_dandiset_cache[dandiset_id]
-
-
-def _get_earliest_asset_path(
-    *,
-    dandiset: dandi.dandiapi.RemoteDandiset,
-    paths: list[str],
-    asset_created_cache: dict[tuple[str, str], datetime.datetime | None],
-    resolution_failures: list[str],
-    processing_step: str,
-) -> str:
-    """
-    Return the path from *paths* whose asset was created earliest in *dandiset*.
-
-    Falls back to the first path if no asset timestamps can be retrieved.
-    """
-    dandiset_id = dandiset.identifier
-    earliest_path = paths[0]
-    earliest_created: datetime.datetime | None = None
-
-    for path in paths:
-        key = (dandiset_id, path)
-        if key not in asset_created_cache:
-            try:
-                asset = dandiset.get_asset_by_path(path)
-                asset_created_cache[key] = asset.created
-            except dandi.exceptions.NotFoundError:
-                resolution_failures.append(
-                    f"Asset not found: dandiset_id={dandiset_id!r}, "
-                    f"path={path!r}, processing_step={processing_step!r}"
-                )
-                asset_created_cache[key] = None
-                continue
-
-        created = asset_created_cache[key]
-        if created is not None and (earliest_created is None or created < earliest_created):
-            earliest_created = created
-            earliest_path = path
-
-    return earliest_path
-
-
-def _resolve_earliest_path(
-    *,
-    client: dandi.dandiapi.DandiAPIClient,
-    dandiset_id: str,
-    paths: list[str],
-    remote_dandiset_cache: dict[str, dandi.dandiapi.RemoteDandiset | None],
-    asset_created_cache: dict[tuple[str, str], datetime.datetime | None],
-    resolution_failures: list[str],
-    processing_step: str,
-) -> str:
-    """Pick the earliest-created path among *paths*, falling back to the first path."""
-    if len(paths) == 1:
-        return paths[0]
-
-    remote_dandiset = _get_remote_dandiset(client, dandiset_id, remote_dandiset_cache)
-    if remote_dandiset is None:
-        # The dandiset has a creation time from S3 but the REST API cannot resolve its assets
-        # (e.g. it is absent from the API), so the tie-break falls back to the first path.
-        resolution_failures.append(
-            f"Dandiset not resolvable via API: dandiset_id={dandiset_id!r}, " f"processing_step={processing_step!r}"
-        )
-        return paths[0]
-
-    return _get_earliest_asset_path(
-        dandiset=remote_dandiset,
-        paths=paths,
-        asset_created_cache=asset_created_cache,
-        resolution_failures=resolution_failures,
-        processing_step=processing_step,
-    )
-
-
-def _run(base_directory: pathlib.Path, testing: bool, max_workers: int) -> None:
-    """Resolve non-unique content-ID mappings and write a one-to-one output mapping."""
-    input_file_path = (
-        base_directory
-        / "sourcedata"
-        / "content-id-to-dandiset-paths"
-        / "derivatives"
-        / "content_id_to_dandiset_paths.jsonl"
-    )
-    if not input_file_path.exists():
-        raise FileNotFoundError(f"Input file not found: {input_file_path}")
-
-    # Each line is a single-entry mapping of {content_id: {dandiset_id: [paths, ...]}}.
-    content_id_to_dandiset_paths: dict[str, dict[str, list[str]]] = {}
-    with input_file_path.open(mode="r") as file_stream:
-        for line in file_stream:
-            content_id_to_dandiset_paths.update(json.loads(line))
-
-    # Split the entries into the already-unique mappings and the two non-unique cases.
-    content_id_to_usage_dandiset_path: dict[str, dict[str, str]] = {}
-    multiple_dandisets: dict[str, dict[str, list[str]]] = {}
-    multiple_paths_same_dandiset: dict[str, dict[str, list[str]]] = {}
-    for content_id, dandisets in content_id_to_dandiset_paths.items():
+    for content_id, dandisets in dandiset_paths.items():
         if not dandisets:
             raise ValueError(f"Empty dandisets mapping for content_id={content_id!r}")
         if len(dandisets) > 1:
-            multiple_dandisets[content_id] = dandisets
+            several_dandisets[content_id] = dandisets
             continue
 
         dandiset_id, paths = next(iter(dandisets.items()))
         if len(paths) > 1:
-            multiple_paths_same_dandiset[content_id] = {dandiset_id: paths}
+            several_paths[content_id] = {dandiset_id: paths}
             continue
 
-        content_id_to_usage_dandiset_path[content_id] = {dandiset_id: paths[0]}
+        unique[content_id] = {dandiset_id: paths[0]}
 
-    if testing:
-        # Testing run: keep only the first few entries of each category, so the run is fast
-        # but still exercises the passthrough and both resolution heuristics. The dandiset and
-        # asset lookups below are then scoped to just those entries.
-        content_id_to_usage_dandiset_path = dict(
-            itertools.islice(content_id_to_usage_dandiset_path.items(), _TESTING_LIMIT)
+    return unique, several_dandisets, several_paths
+
+
+def earliest_path(resolver, dandiset_id: str, paths: list[str], /, *, failures, step: str) -> str:
+    """The path whose asset was created first, falling back to the first path.
+
+    Every failure to place an asset in time is recorded rather than raised: one unresolvable asset
+    should not lose the whole content ID, and the fallback is the same one the cache has always
+    used.
+    """
+    if len(paths) == 1:
+        return paths[0]
+
+    try:
+        # Asked once, before the per-path lookups: an unresolvable Dandiset is one problem, not one
+        # per path. Both raise `NotFoundError`, so they are only distinguishable by asking apart.
+        resolver.dandiset(dandiset_id)
+    except dandi.exceptions.NotFoundError:
+        failures.append(f"Dandiset not resolvable via API: dandiset_id={dandiset_id!r}, processing_step={step!r}")
+        return paths[0]
+
+    chosen, earliest = paths[0], None
+    for path in paths:
+        try:
+            created = resolver.created(dandiset_id, path)
+        except dandi.exceptions.NotFoundError:
+            failures.append(f"Asset not found: dandiset_id={dandiset_id!r}, path={path!r}, processing_step={step!r}")
+            continue
+        if created is not None and (earliest is None or created < earliest):
+            chosen, earliest = path, created
+
+    return chosen
+
+
+def build_mapping(dataset, *, limit: int | None) -> list:
+    """Resolve every content ID to one usage location, and return the records to publish."""
+    dandiset_paths = dataset.read_input()
+    unique, several_dandisets, several_paths = split_by_uniqueness(dandiset_paths)
+
+    if limit is not None:
+        # Cap each category rather than the result, so a bounded run still exercises the
+        # passthrough and both heuristics rather than only the first of them.
+        unique = dict(itertools.islice(unique.items(), limit))
+        several_dandisets = dict(itertools.islice(several_dandisets.items(), limit))
+        several_paths = dict(itertools.islice(several_paths.items(), limit))
+
+    dandiset_failures = dandi_cache.ErrorLog(dataset.logs_directory / f"{dataset.log_prefix}dandiset_failures.txt")
+    resolution_failures = dandi_cache.ErrorLog(dataset.logs_directory / f"{dataset.log_prefix}resolution_failures.txt")
+    unresolved: list[str] = []
+
+    # Only the non-unique entries need a creation time; the passthrough needs none.
+    referenced = {
+        dandiset_id
+        for dandisets in itertools.chain(several_dandisets.values(), several_paths.values())
+        for dandiset_id in dandisets
+    }
+    ordered = sorted(referenced)
+    dandi_cache.logger.info("Fetching creation times for %d dandisets from S3.", len(ordered))
+    client = dandi_cache.s3.anonymous_client(max_pool_connections=MAX_WORKERS)
+    created_on = {
+        dandiset_id: created
+        for dandiset_id, created in zip(
+            ordered,
+            dandi_cache.s3.concurrent_map(
+                lambda dandiset_id: dandi_cache.s3.dandiset_created(client, dandiset_id),
+                ordered,
+                max_workers=MAX_WORKERS,
+            ),
         )
-        multiple_dandisets = dict(itertools.islice(multiple_dandisets.items(), _TESTING_LIMIT))
-        multiple_paths_same_dandiset = dict(itertools.islice(multiple_paths_same_dandiset.items(), _TESTING_LIMIT))
+        if created is not None
+    }
+    dandi_cache.logger.info("Resolved %d dandiset creation times.", len(created_on))
 
-    asset_created_cache: dict[tuple[str, str], datetime.datetime | None] = {}
-    remote_dandiset_cache: dict[str, dandi.dandiapi.RemoteDandiset | None] = {}
-    resolution_failures: list[str] = []
-    dandiset_failures: list[str] = []
+    resolver = dandi_cache.api.AssetResolver()
 
-    client = dandi.dandiapi.DandiAPIClient()
-
-    # Collect creation times only for the dandisets actually referenced by the non-unique
-    # entries (the already-unique passthrough needs none), read from their S3 dandiset.jsonld.
-    # Dandisets that have been deleted are simply absent from this mapping.
-    referenced_dandiset_ids: set[str] = set()
-    for dandisets in multiple_dandisets.values():
-        referenced_dandiset_ids.update(dandisets.keys())
-    for dandisets in multiple_paths_same_dandiset.values():
-        referenced_dandiset_ids.update(dandisets.keys())
-
-    print(f"Fetching creation times for {len(referenced_dandiset_ids)} dandisets from S3...", flush=True)
-    s3_client = _build_s3_client(max_pool_connections=max_workers)
-    dandiset_created_on = _collect_dandiset_created_on(s3_client, referenced_dandiset_ids, max_workers=max_workers)
-    print(f"  Resolved {len(dandiset_created_on)} dandiset creation times", flush=True)
-
-    # Resolve entries where the same content-ID appears in multiple dandisets.
-    # Heuristic: prefer the dandiset that came into existence first.
-    print(f"Resolving {len(multiple_dandisets)} multiple-dandiset entries...", flush=True)
-    for idx, (content_id, dandisets) in enumerate(multiple_dandisets.items(), start=1):
-        if idx % 100 == 0:
-            print(f"  {idx}/{len(multiple_dandisets)}", flush=True)
-
-        # Exclude dandisets that have been deleted (no creation time from S3).
-        available = {d: paths for d, paths in dandisets.items() if d in dandiset_created_on}
+    dandi_cache.logger.info("Resolving %d content IDs seen in several dandisets.", len(several_dandisets))
+    for content_id, dandisets in several_dandisets.items():
+        # A Dandiset with no creation time has been deleted or embargoed, so it cannot be placed
+        # in time and is excluded, exactly as it was under the old listing-based pass.
+        available = {dandiset_id: paths for dandiset_id, paths in dandisets.items() if dandiset_id in created_on}
         if not available:
+            unresolved.append(content_id)
             dandiset_failures.append(f"No dandiset found for content_id={content_id!r}")
             continue
 
-        earliest_dandiset_id = min(available.keys(), key=lambda d: dandiset_created_on[d])
-
-        path = _resolve_earliest_path(
-            client=client,
-            dandiset_id=earliest_dandiset_id,
-            paths=available[earliest_dandiset_id],
-            remote_dandiset_cache=remote_dandiset_cache,
-            asset_created_cache=asset_created_cache,
-            resolution_failures=resolution_failures,
-            processing_step="dandiset came first",
+        first = min(available, key=lambda dandiset_id: created_on[dandiset_id])
+        path = earliest_path(
+            resolver, first, available[first], failures=resolution_failures, step="dandiset came first"
         )
-        content_id_to_usage_dandiset_path[content_id] = {earliest_dandiset_id: path}
+        unique[content_id] = {first: path}
 
-    # Resolve entries where the same content-ID appears in multiple paths within one dandiset.
-    # Heuristic: prefer the asset path that was created first.
-    print(f"Resolving {len(multiple_paths_same_dandiset)} multiple-path entries...", flush=True)
-    for idx, (content_id, dandisets) in enumerate(multiple_paths_same_dandiset.items(), start=1):
-        if idx % 100 == 0:
-            print(f"  {idx}/{len(multiple_paths_same_dandiset)}", flush=True)
-
+    dandi_cache.logger.info("Resolving %d content IDs seen under several paths.", len(several_paths))
+    for content_id, dandisets in several_paths.items():
         dandiset_id, paths = next(iter(dandisets.items()))
-
-        # Skip if the dandiset has been deleted.
-        if dandiset_id not in dandiset_created_on:
-            dandiset_failures.append(f'Dandiset "{dandiset_id!r}" not found in `dandiset_created_on`!')
+        if dandiset_id not in created_on:
+            unresolved.append(content_id)
+            dandiset_failures.append(f"Dandiset {dandiset_id!r} has no creation time, for content_id={content_id!r}")
             continue
 
-        path = _resolve_earliest_path(
-            client=client,
-            dandiset_id=dandiset_id,
-            paths=paths,
-            remote_dandiset_cache=remote_dandiset_cache,
-            asset_created_cache=asset_created_cache,
-            resolution_failures=resolution_failures,
-            processing_step="asset came first",
-        )
-        content_id_to_usage_dandiset_path[content_id] = {dandiset_id: path}
+        path = earliest_path(resolver, dandiset_id, paths, failures=resolution_failures, step="asset came first")
+        unique[content_id] = {dandiset_id: path}
 
-    # One JSON value per line: `{"<content_id>": {"<dandiset_id>": "<path>"}}`.
-    records = [
-        {content_id: content_id_to_usage_dandiset_path[content_id]}
-        for content_id in sorted(content_id_to_usage_dandiset_path)
-    ]
+    if unresolved:
+        dandi_cache.logger.warning("%d content IDs could not be placed in any dandiset.", len(unresolved))
+    return [{content_id: unique[content_id]} for content_id in sorted(unique)]
 
-    derivatives_directory = base_directory / "derivatives"
-    derivatives_directory.mkdir(parents=True, exist_ok=True)
 
-    # Testing runs write to their own designated files, so the real cache is never touched.
-    output_file_path = derivatives_directory / (_TESTING_FILE_NAME if testing else _CACHE_FILE_NAME)
-    print(f"Writing {len(records)} entries to {output_file_path}", flush=True)
-    with output_file_path.open(mode="w") as file_stream:
-        file_stream.writelines(f"{json.dumps(record)}\n" for record in records)
+def main() -> None:
+    dataset, arguments = dandi_cache.open_dataset()
+    limit = dandi_cache.effective_limit(testing=dataset.testing, limit=arguments.limit)
 
-    # The failure logs are rewritten in full on every run so they always reflect the
-    # current state of the upstream data, and are saved into the derivatives dataset
-    # alongside the output for provenance.
-    logs_directory = derivatives_directory / "logs"
-    logs_directory.mkdir(parents=True, exist_ok=True)
-    log_file_prefix = "testing_" if testing else ""
-    with (logs_directory / f"{log_file_prefix}dandiset_failures.txt").open(mode="w") as file_stream:
-        file_stream.writelines(f"{line}\n" for line in dandiset_failures)
-    with (logs_directory / f"{log_file_prefix}resolution_failures.txt").open(mode="w") as file_stream:
-        file_stream.writelines(f"{line}\n" for line in resolution_failures)
+    # The failure logs describe the current state of the upstream data rather than a history, so
+    # each run starts them afresh. The shared `ErrorLog` appends and caps its own size, which is
+    # what an incremental cache wants; a full rebuild wants neither.
+    for name in ("dandiset_failures.txt", "resolution_failures.txt"):
+        (dataset.logs_directory / f"{dataset.log_prefix}{name}").unlink(missing_ok=True)
+
+    dandi_cache.run_full_rebuild(dataset, build=lambda: build_mapping(dataset, limit=limit))
 
 
 if __name__ == "__main__":
-    default_base_directory = pathlib.Path(__file__).parent.parent
-
-    parser = argparse.ArgumentParser(description="Update the content-id-to-usage-dandiset-path DANDI cache.")
-    parser.add_argument(
-        "--base-directory",
-        type=pathlib.Path,
-        default=default_base_directory,
-        help=(
-            "The directory containing the `sourcedata` and `derivatives` directories. "
-            "Set to the mounted dataset path when run inside the pipeline container; "
-            "defaults to the repository root."
-        ),
-    )
-    parser.add_argument(
-        "--max-workers",
-        type=int,
-        default=16,
-        help="Number of concurrent workers used to fetch dandiset creation times from S3.",
-    )
-    parser.add_argument(
-        "--testing",
-        action="store_true",
-        help=(
-            f"Run in testing mode: process only the first {_TESTING_LIMIT} entries of each category "
-            f"and write `derivatives/{_TESTING_FILE_NAME}` (and `testing_`-prefixed logs) instead of "
-            "the real cache, leaving it untouched. Omit for a complete update."
-        ),
-    )
-    args = parser.parse_args()
-
-    _run(base_directory=args.base_directory, testing=args.testing, max_workers=args.max_workers)
+    main()
