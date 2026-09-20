@@ -1,0 +1,7 @@
+2026-09-20T08:52:45Z INFO Logging to /tmp/logs/update_2026-09-20T08-52-45Z.log.
+2026-09-20T08:52:45Z INFO Update content-id-to-usage-dandiset-path (base directory /tmp).
+2026-09-20T08:52:46Z INFO Fetching creation times for 108 dandisets from S3.
+2026-09-20T08:52:47Z INFO Resolved 108 dandiset creation times.
+2026-09-20T08:52:48Z INFO Resolving 4593 content IDs seen in several dandisets.
+2026-09-20T09:07:35Z INFO Resolving 6695 content IDs seen under several paths.
+2026-09-20T09:35:58Z INFO Wrote 414733 records to /tmp/derivatives/content_id_to_usage_dandiset_path.jsonl in 43.2 min (peak memory 526 MiB).
