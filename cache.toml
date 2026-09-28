@@ -9,6 +9,19 @@
 [cache]
 name = "content-id-to-usage-dandiset-path"
 
+# Two files, written together by every run:
+#
+#   content_id_to_usage_dandiset_path  the cache itself, one `{dandiset ID: path}` per content ID
+#   content_id_to_resolved_from        the fingerprint of the upstream entry each heuristic answer
+#                                      was resolved from, which is what makes reusing it safe
+#
+# Declaring them here is what publishes both to `dist` and what keeps a `testing_` artifact from
+# reaching consumers.
+outputs = [
+    "content_id_to_usage_dandiset_path.jsonl",
+    "content_id_to_resolved_from.jsonl",
+]
+
 # Upstream cache, registered as a DataLad input subdataset and pinned in every run's provenance.
 #
 # `lookup` because the update code needs the whole mapping at once to split it into the
@@ -17,6 +30,21 @@ name = "content-id-to-usage-dandiset-path"
 [[inputs]]
 name = "content-id-to-dandiset-paths"
 format = "lookup"
+
+# Most content IDs appear once, under one path, and reducing them is a passthrough with no work in
+# it; the rest cost a Dandiset creation time from S3 and an asset creation time per candidate path
+# from the DANDI API. This is how many of those a run resolves. It does not bind today -- the cache
+# recomputed all of them every run until it became accumulative -- and is the ceiling that keeps a
+# growing archive from outgrowing the cron rather than a throttle on the current one.
+#
+# Nothing is lost while it converges. The first run under the accumulative model has no
+# fingerprints recorded yet, so every ambiguous content ID looks stale, but their answers are
+# already in the published file and are republished whether or not this run reconfirmed them.
+[operations.update]
+limit = 2000
+# Two ambiguous content IDs exercise both heuristics and every network call behind them, and the
+# passthrough runs in full regardless, since it costs nothing.
+testing_limit = 2
 
 # The published branches describe this repository as a BIDS study dataset, through a
 # `dataset_description.json` with `DatasetType: "study"`. The pipeline renders that file from this

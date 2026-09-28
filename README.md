@@ -11,6 +11,11 @@ Updated frequently.
 
 Primarily for use by developers.
 
+A second file, `derivatives/content_id_to_resolved_from.jsonl`, records a short digest of the upstream entry each heuristic answer was resolved from.
+It is bookkeeping rather than data, and it is what makes the cache accumulative: a content ID's answer depends on nothing but its own upstream entry, so an unchanged digest means the recorded answer is still correct and costs no further network round trips.
+A content ID that gains a Dandiset or a path gets a different digest and is resolved again.
+Content IDs that were already unique upstream need no heuristic and so have no entry here.
+
 
 
 ## One-time use
