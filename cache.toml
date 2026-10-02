@@ -33,15 +33,19 @@ format = "lookup"
 
 # Most content IDs appear once, under one path, and reducing them is a passthrough with no work in
 # it; the rest cost a Dandiset creation time from S3 and an asset creation time per candidate path
-# from the DANDI API. This is how many of those a run resolves. It does not bind today -- the cache
-# recomputed all of them every run until it became accumulative -- and is the ceiling that keeps a
-# growing archive from outgrowing the cron rather than a throttle on the current one.
+# from the DANDI API. This is how many of those a run resolves: the ceiling that keeps a growing
+# archive from outgrowing the cron rather than a throttle on the current one.
 #
 # Nothing is lost while it converges. The first run under the accumulative model has no
 # fingerprints recorded yet, so every ambiguous content ID looks stale, but their answers are
 # already in the published file and are republished whether or not this run reconfirmed them.
+#
+# Sized from this cache's own update logs, slow items included: resampling 6,000 timed items puts a
+# run of 20000 at about 100 minutes typically and 118 at the 99th percentile, inside the job's
+# 330-minute timeout with margin. The margin matters, because a run that times out publishes nothing
+# it did. 20000 clears the backlog of ambiguous content IDs in one run.
 [operations.update]
-limit = 2000
+limit = 20000
 # Two ambiguous content IDs exercise both heuristics and every network call behind them, and the
 # passthrough runs in full regardless, since it costs nothing.
 testing_limit = 2
