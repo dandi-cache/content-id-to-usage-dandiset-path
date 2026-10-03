@@ -1,0 +1,16 @@
+2026-10-03T11:59:12Z INFO Logging to /tmp/logs/update_2026-10-03T11-59-12Z.log.
+2026-10-03T11:59:12Z INFO Update content-id-to-usage-dandiset-path (base directory /tmp).
+2026-10-03T11:59:14Z INFO 520383 content IDs are already unique; 11764 need a heuristic.
+2026-10-03T11:59:15Z INFO Fetching creation times for 2 dandisets from S3.
+2026-10-03T11:59:16Z INFO Resolved 2 dandiset creation times.
+2026-10-03T11:59:17Z INFO Processing 8 items (532147 already recorded).
+2026-10-03T11:59:18Z INFO [1/8] 32a22dd3-7250-473e-abc1-dfe122485d72: attributed to 001697; 0.7 s; peak memory 764 MiB.
+2026-10-03T12:02:10Z INFO [2/8] 374d93d6-f54a-49e3-9bd4-23cc49c2e489: attributed to 001697; 172.7 s; peak memory 764 MiB.
+2026-10-03T12:02:10Z INFO [3/8] a0ea5e2b-4d70-4b2d-b235-2ce2494b032d: attributed to 001697; 0.2 s; peak memory 764 MiB.
+2026-10-03T12:02:11Z INFO [4/8] a1fc9886-bd7c-4b2a-b109-4305c1c4f929: attributed to 001697; 0.2 s; peak memory 764 MiB.
+2026-10-03T12:02:11Z INFO [5/8] a828aada-d256-470c-9533-b5711de826ac: attributed to 001697; 0.2 s; peak memory 764 MiB.
+2026-10-03T12:02:11Z INFO [6/8] a8b0221a-939f-4efd-bc42-2b9615e17307: attributed to 001697; 0.2 s; peak memory 764 MiB.
+2026-10-03T12:02:12Z INFO [7/8] c9a2323a-0b40-46f9-a428-0632d22373b3: attributed to 001697; 0.6 s; peak memory 764 MiB.
+2026-10-03T12:02:12Z INFO [8/8] d7aa2345-5ffa-4700-970a-56d26525bb5c: attributed to 001697; 0.3 s; peak memory 764 MiB.
+2026-10-03T12:02:13Z INFO Wrote 532147 records to /tmp/derivatives/content_id_to_usage_dandiset_path.jsonl (8 new, 0 failed) in 2.9 min (peak memory 764 MiB).
+2026-10-03T12:02:13Z INFO Resolved 8 ambiguous content IDs; 11764 of 11764 are now current, leaving 0 for later runs.
