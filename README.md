@@ -29,16 +29,11 @@ import gzip
 import json
 import urllib.request
 
-base = "https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/dist/derivatives"
-content_id_to_usage_dandiset_path = []
-for digit in "0123456789abcdef":
-    with urllib.request.urlopen(f"{base}/content_id_to_usage_dandiset_path_{digit}.jsonl.gz") as response:
-        lines = gzip.decompress(data=response.read()).decode("utf-8").splitlines()
-    content_id_to_usage_dandiset_path += [json.loads(line) for line in lines]
+url = "https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/dist/derivatives/content_id_to_usage_dandiset_path.jsonl.gz"
+with urllib.request.urlopen(url) as response:
+    lines = gzip.decompress(data=response.read()).decode("utf-8").splitlines()
+content_id_to_usage_dandiset_path = [json.loads(line) for line in lines]
 ```
-
-The cache is split across sixteen files by the first hexadecimal digit of the content ID, `content_id_to_usage_dandiset_path_0.jsonl.gz` to `content_id_to_usage_dandiset_path_f.jsonl.gz`, because as one file it outgrew GitHub's 100 MiB limit.
-A content ID's entry is in the file named by its first digit.
 
 Each line is a record of the form:
 
@@ -49,9 +44,7 @@ Each line is a record of the form:
 ### Save to file
 
 ```bash
-for digit in 0 1 2 3 4 5 6 7 8 9 a b c d e f; do
-  curl -O "https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/dist/derivatives/content_id_to_usage_dandiset_path_${digit}.jsonl.gz"
-done
+curl https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/dist/derivatives/content_id_to_usage_dandiset_path.jsonl.gz -o content_id_to_usage_dandiset_path.jsonl.gz
 ```
 
 

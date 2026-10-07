@@ -15,31 +15,18 @@ name = "content-id-to-usage-dandiset-path"
 #   content_id_to_resolved_from        the fingerprint of the upstream entry each heuristic answer
 #                                      was resolved from, which is what makes reusing it safe
 #
-# The cache itself is split across sixteen files by the first digit of the content ID,
-# `content_id_to_usage_dandiset_path_0.jsonl` to `content_id_to_usage_dandiset_path_f.jsonl`. As one
-# file it grew to within a week of GitHub's 100 MiB limit, past which every push is refused.
-#
-# Declaring them here is what publishes all of them to `dist` and what keeps a `testing_` artifact
-# from reaching consumers.
+# Declaring them here is what publishes both to `dist` and what keeps a `testing_` artifact from
+# reaching consumers.
 outputs = [
-    "content_id_to_usage_dandiset_path_0.jsonl",
-    "content_id_to_usage_dandiset_path_1.jsonl",
-    "content_id_to_usage_dandiset_path_2.jsonl",
-    "content_id_to_usage_dandiset_path_3.jsonl",
-    "content_id_to_usage_dandiset_path_4.jsonl",
-    "content_id_to_usage_dandiset_path_5.jsonl",
-    "content_id_to_usage_dandiset_path_6.jsonl",
-    "content_id_to_usage_dandiset_path_7.jsonl",
-    "content_id_to_usage_dandiset_path_8.jsonl",
-    "content_id_to_usage_dandiset_path_9.jsonl",
-    "content_id_to_usage_dandiset_path_a.jsonl",
-    "content_id_to_usage_dandiset_path_b.jsonl",
-    "content_id_to_usage_dandiset_path_c.jsonl",
-    "content_id_to_usage_dandiset_path_d.jsonl",
-    "content_id_to_usage_dandiset_path_e.jsonl",
-    "content_id_to_usage_dandiset_path_f.jsonl",
+    "content_id_to_usage_dandiset_path.jsonl",
     "content_id_to_resolved_from.jsonl",
 ]
+
+# Kept on `derivatives` as sixteen files, `content_id_to_usage_dandiset_path_0.jsonl` to
+# `content_id_to_usage_dandiset_path_f.jsonl`, by the first digit of the content ID. As one file it
+# was 93 MB, within about a week of GitHub's 100 MiB limit. `dist` still publishes it as the one
+# `content_id_to_usage_dandiset_path.jsonl.gz`, so no consumer URL changes.
+split = ["content_id_to_usage_dandiset_path.jsonl"]
 
 # Upstream cache, registered as a DataLad input subdataset and pinned in every run's provenance.
 #
