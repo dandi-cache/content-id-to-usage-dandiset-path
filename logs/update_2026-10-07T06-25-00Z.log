@@ -1,0 +1,9 @@
+2026-10-07T06:25:00Z INFO Logging to /tmp/logs/update_2026-10-07T06-25-00Z.log.
+2026-10-07T06:25:00Z INFO Update content-id-to-usage-dandiset-path (base directory /tmp).
+2026-10-07T06:25:02Z INFO 560362 content IDs are already unique; 12036 need a heuristic.
+2026-10-07T06:25:03Z INFO Fetching creation times for 1 dandisets from S3.
+2026-10-07T06:25:03Z INFO Resolved 1 dandiset creation times.
+2026-10-07T06:25:04Z INFO Processing 1 items (572398 already recorded).
+2026-10-07T06:29:07Z INFO [1/1] 32fb6873-0e71-4913-88fa-7ee9e5eefbdb: attributed to 000571; 242.2 s; peak memory 813 MiB.
+2026-10-07T06:29:08Z INFO Wrote 572398 records to /tmp/derivatives/content_id_to_usage_dandiset_path.jsonl (1 new, 0 failed) in 4.0 min (peak memory 813 MiB).
+2026-10-07T06:29:08Z INFO Resolved 1 ambiguous content IDs; 12036 of 12036 are now current, leaving 0 for later runs.
