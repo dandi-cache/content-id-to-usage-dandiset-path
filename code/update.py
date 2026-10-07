@@ -142,7 +142,7 @@ def main() -> None:
     unique, ambiguous = split_by_uniqueness(dandiset_paths)
     dandi_cache.logger.info("%d content IDs are already unique; %d need a heuristic.", len(unique), len(ambiguous))
 
-    records = dataset.read_output_lookup()
+    records = dataset.read_split_output_lookup(dataset.config.cache_file_name)
     resolved_from = dataset.read_output_lookup(RESOLVED_FROM)
 
     # A content ID the upstream no longer lists is no longer this cache's to publish. Dropping it
@@ -210,6 +210,8 @@ def main() -> None:
         stages=STAGES,
         describe=lambda location: f"attributed to {next(iter(location))}",
         checkpoint_every=50,
+        # Split across sixteen files, since as one it would pass GitHub's 100 MiB limit for a file.
+        split=True,
     )
 
     dandi_cache.logger.info(
