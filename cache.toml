@@ -22,6 +22,12 @@ outputs = [
     "content_id_to_resolved_from.jsonl",
 ]
 
+# Kept on `derivatives` as sixteen files, `content_id_to_usage_dandiset_path_0.jsonl` to
+# `content_id_to_usage_dandiset_path_f.jsonl`, by the first digit of the content ID. As one file it
+# was 93 MB, within about a week of GitHub's 100 MiB limit. `dist` still publishes it as the one
+# `content_id_to_usage_dandiset_path.jsonl.gz`, so no consumer URL changes.
+split = ["content_id_to_usage_dandiset_path.jsonl"]
+
 # Upstream cache, registered as a DataLad input subdataset and pinned in every run's provenance.
 #
 # `lookup` because the update code needs the whole mapping at once to split it into the
