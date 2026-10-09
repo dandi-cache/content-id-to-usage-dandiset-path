@@ -3555,6 +3555,7 @@
 {"d1936f88-77ce-43dc-a1d6-04af99d1bbea": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Passive_acq-rec_run-74_ieeg.mefd/CH8.timd/CH8-000000.segd/CH8-000000.tidx"}}
 {"d193a32b-782c-4123-8d5e-4311004beb9a": {"001769": "rawdata/sub-I65/strips_OCT/sub-I65_sample-slice003_chunk-0021_acq-normal_OCT.nii.gz"}}
 {"d193af90-7ed8-4b82-8bd8-b2e4a08d8ccb": {"001412": "rawdata/sub-MF283/sub-MF283_sample-slice130_chunk-0022_OCT.nii.gz"}}
+{"d1942575-cb33-4f85-a916-fa564573cb36": {"001697": "derivatives/dandisets-001/dandiset-001788/sub-BTT3/sub-BTT3_ses-260304-BTT3-day7_ecephys/pipeline-lfp/job-261009739d99/code/submitted_date-2026+10+09_time-05+18+01"}}
 {"d1943308-12bd-46b3-9b34-9583f7e4e2c3": {"000571": "sourcedata/sub-c01/ses-functional/ieeg/visual/day921R04.dat"}}
 {"d1944dad-96e2-4e71-8a44-ce006a1cb367": {"000571": "sub-c04/ses-Functional/ieeg/sub-c04_ses-Functional_task-Sensorimotor_acq-rec_run-6_ieeg.mefd/CH23.timd/CH23-000000.segd/CH23-000000.tmet"}}
 {"d194536c-269e-4c1b-8ab6-a14276a0499e": {"000571": "sub-c03/ses-chronicStimulation/ieeg/sub-c03_ses-chronicStimulation_task-temporal_acq-day46_run-01_ieeg.mefd/Ch22.timd/Ch22-000000.segd/Ch22-000000.tdat"}}
@@ -5906,6 +5907,7 @@
 {"d2968141-50b8-4b09-a164-48eeaab30319": {"000026": "sub-I38/ses-SPIM/micr/sub-I38_ses-SPIM_sample-BrocaAreaS18_stain-Calretinin_chunk-03_SPIM.ome.tif"}}
 {"d296deb2-011a-4aa3-bad9-0fb0b6c69cae": {"001169": "sub-G093/sub-G093_ses-RWTautowait2-20230217-152109.nwb"}}
 {"d29704e0-ba09-4cda-92dc-5e3d92a41946": {"000571": "sub-c01/ses-chronicRecordings/ieeg/sub-c01_ses-chronicRecordings_task-rest_acq-day1054_run-01_ieeg.mefd/Ch20.timd/Ch20-000000.segd/Ch20-000000.tidx"}}
+{"d2972202-8262-4483-9c7f-e0b68ef4ac9f": {"001697": "derivatives/dandisets-000/dandiset-000568/sub-fCamk5/sub-fCamk5_ses-fCamk5-210406-sess10_behavior+ecephys/pipeline-aind+ephys/job-261009f5976d/logs/job-25380050_slurm.log"}}
 {"d2977349-7966-4ef8-9797-8bb99f29d1cf": {"000713": "sub-548715/sub-548715_ses-20210111T115111_image.nwb"}}
 {"d2978f80-3be0-431f-94a3-db8786888551": {"001607": "sub-Banner/sub-Banner_ses-Banner-20220224_obj-l2voai_behavior.nwb"}}
 {"d297a3c4-1545-4893-9b90-a82b0acb7f2a": {"000571": "sub-c04/ses-chronicStimulation/ieeg/sub-c04_ses-chronicStimulation_task-baseline_acq-day119_run-01_ieeg.mefd/Ch24.timd/Ch24-000000.segd/Ch24-000000.tdat"}}
@@ -29543,6 +29545,7 @@
 {"dd13a3ed-9d16-4f78-a8e3-3f183e17cb1c": {"000341": "In_vivo/sub-1710231rm/sub-1710231rm_ses-1710231rm-6-1,2,3-2_icephys+image.nwb"}}
 {"dd13a711-b02e-44b4-a930-fc4b38064eb6": {"000571": "sub-c01/ses-functional/ieeg/sub-c01_ses-functional_task-somatosensory_acq-day340_run-03_ieeg.mefd/Ch27.timd/Ch27-000000.segd/Ch27-000000.tmet"}}
 {"dd13c1a3-39b3-4b79-b4e9-c202d4568f22": {"000217": "sub-Mouse 2061/sub-Mouse 2061_ses-Session 03_obj-z5qk2e.nwb"}}
+{"dd13c4ad-7d15-4dd1-93db-5f9a08f72a4b": {"001697": "derivatives/dandisets-000/dandiset-000620/sub-Elgar/sub-Elgar_ses-2022-09-09_ecephys/pipeline-aind+ephys/job-2610095d2d10/code/submitted_date-2026+10+09_time-08+53+21"}}
 {"dd13ef32-6550-4840-9be9-1725c5d37329": {"000246": "sub-PHP-V15-L11/sub-PHP-V15-L11_obj-t3t6bm_ophys.nwb"}}
 {"dd1422a0-e11d-413b-99bb-a4758d6f8691": {"001412": "rawdata/sub-MF283/sub-MF283_sample-slice135_chunk-0035_OCT.nii.gz"}}
 {"dd142d40-d03c-4ddf-a8fc-0c5306a92ff0": {"002006": "sub-Thor/sub-Thor_ses-zztnewjuiceVLS46.nwb"}}
@@ -31069,6 +31072,7 @@
 {"ddc45e42-d28e-410a-bb53-70dc1c4bf6d7": {"000026": "sub-I38/ses-SPIM/micr/sub-I38_ses-SPIM_sample-BrocaAreaS07_stain-Somatostatin_chunk-05_SPIM.json"}}
 {"ddc4ad49-1f1a-40e3-9516-5fda318ef384": {"000108": "sub-MITU01/ses-20211016h18m33s42/micr/sub-MITU01_ses-20211016h18m33s42_sample-100_stain-YO_run-1_chunk-3_SPIM.ome.zarr"}}
 {"ddc4b2b5-3a87-4f7e-8d26-1945ab10c115": {"000571": "sub-c02/ses-chronicRecordings/ieeg/sub-c02_ses-chronicRecordings_task-rest_acq-day84_run-02_ieeg.mefd/Ch15.timd/Ch15-000000.segd/Ch15-000000.tmet"}}
+{"ddc4d775-cdd5-41bd-a687-6380c7e1e5e8": {"001697": "derivatives/dandisets-000/dandiset-000568/sub-fCamk5/sub-fCamk5_ses-fCamk5-210406-sess10_behavior+ecephys/pipeline-lfp/job-261009915d84/code/submitted_date-2026+10+09_time-04+46+18"}}
 {"ddc50a5a-f1cd-4876-9256-363288cf1113": {"000711": "sub-451787/sub-451787_ses-20190503T131547_image.nwb"}}
 {"ddc542a3-39a1-4934-a84e-d648c06a48e6": {"000341": "Human_persistent_RAF/sub-160226/sub-160226_ses-1602263rm-2-1-4_icephys.nwb"}}
 {"ddc5738f-b776-4444-bc55-3b8a97b98155": {"000891": "sub-FB2320/sub-FB2320_ses-FB2320-baseline_image.nwb"}}

@@ -1519,6 +1519,7 @@
 {"b0a72777-f0de-4621-882d-b86c81339a36": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim612001_run-7_ieeg.mefd/CH5.timd/CH5-000000.segd/CH5-000000.tdat"}}
 {"b0a72fa6-0605-42d2-a2cb-ee8057a599ba": {"000571": "sub-c01/ses-chronicRecordings/ieeg/sub-c01_ses-chronicRecordings_task-rest_acq-day700_run-02_ieeg.mefd/Ch21.timd/Ch21-000000.segd/Ch21-000000.tidx"}}
 {"b0a7579e-e3a0-46a4-98d8-2eff9411b0af": {"000571": "sub-c02/ses-Intraopdata/ieeg/sub-c02_ses-Intraopdata_task-rec_acq-rec_run-1_ieeg.mefd/CH25.timd/CH25-000000.segd/CH25-000000.tmet"}}
+{"b0a763fc-1351-4738-bfd9-837ffd24987a": {"001697": "derivatives/dandisets-000/dandiset-000363/sub-484675/sub-484675_ses-20210323T164459_behavior+ecephys+ogen/pipeline-lfp/job-2610095e41d7/code/submitted_date-2026+10+09_time-05+16+54"}}
 {"b0a76988-1d00-4e4e-ac59-d58c145f828d": {"001412": "derivatives/sub-MF283/strips_raw/sample-slice085/sub-MF283_sample-slice085_chunk-0015_acq-camera-02.ome.zarr"}}
 {"b0a78598-72dc-40ec-b2b6-c10387d33953": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim612001_run-20_ieeg.mefd/CH11.timd/CH11-000000.segd/CH11-000000.tdat"}}
 {"b0a7a580-25ae-4e21-a2de-213abbf0c192": {"001412": "derivatives/sub-MF283/strips_raw/sample-slice124/sub-MF283_sample-slice124_chunk-0013_acq-camera-01.ome.zarr"}}
@@ -27543,6 +27544,7 @@
 {"bc18bb2f-c121-4c44-bd7b-98bbf1dd7ba0": {"000571": "sub-c02/ses-chronicRecordings/ieeg/sub-c02_ses-chronicRecordings_task-rest_acq-day66_run-03_ieeg.mefd/Ch2.timd/Ch2-000000.segd/Ch2-000000.tmet"}}
 {"bc1909bd-99ea-435d-b44f-de6abc7cc1ca": {"000571": "sub-c01/ses-BSEPs/ieeg/sub-c01_ses-BSEPs_task-frontal_acq-day261_run-01_ieeg.mefd/Ch4.timd/Ch4-000000.segd/Ch4-000000.tidx"}}
 {"bc1925cb-5050-4892-8baa-fdb2e7051ee2": {"000571": "sub-c04/ses-chronicStimulation/ieeg/sub-c04_ses-chronicStimulation_task-stim50Hz_acq-day164_run-02_ieeg.mefd/ImplantControlValue.timd/ImplantControlValue-000000.segd/ImplantControlValue-000000.tmet"}}
+{"bc192cf7-45d0-4be7-83a8-0aae29fda495": {"001697": "derivatives/dandisets-000/dandiset-000463/sub-BH444/sub-BH444_ses-20230214T215744_ecephys/pipeline-lfp/job-2610098562c6/code/submitted_date-2026+10+09_time-04+44+59"}}
 {"bc193559-0c33-4cc8-bd1e-ec074eb662a2": {"001851": "sub-fly-21032024-125/sub-fly-21032024-125_ses-21032024-SS010162-UAS-CsChrimson-1-125_behavior+image+ogen.nwb"}}
 {"bc196023-bfa7-466a-a439-6241922695aa": {"000571": "sub-c02/ses-BSEPs/ieeg/sub-c02_ses-BSEPs_task-LANT_acq-day99_run-04_ieeg.mefd/Ch5.timd/Ch5-000000.segd/Ch5-000000.tmet"}}
 {"bc196dc6-cf2c-489d-b83f-f3853dcf1304": {"000571": "sourcedata/sub-c02/ses-chronicImpedance/day91R03.txt"}}
@@ -28265,6 +28267,7 @@
 {"bc6af792-907e-4b54-a673-b998c6edd2c0": {"000571": "sub-c02/ses-Functional/ieeg/sub-c02_ses-Functional_task-Visual_acq-rec_run-12_ieeg.mefd/CH4.timd/CH4-000000.segd/CH4-000000.tmet"}}
 {"bc6b274e-c478-426d-9e51-5d12baaeef5a": {"000571": "sub-c04/ses-chronicStimulation/ieeg/sub-c04_ses-chronicStimulation_task-stim125Hz_acq-day165_run-01_ieeg.mefd/Ch31.timd/Ch31-000000.segd/Ch31-000000.tmet"}}
 {"bc6b3633-a47b-47ca-a7bd-f84838a6d200": {"000571": "sub-c03/ses-chronicStimulation/ieeg/sub-c03_ses-chronicStimulation_task-temporal_acq-day46_run-01_ieeg.mefd/Ch32.timd/Ch32-000000.segd/Ch32-000000.tdat"}}
+{"bc6b40fd-a2c8-4555-bded-15b3952ba11d": {"001697": "derivatives/dandisets-001/dandiset-001363/sub-BH625/sub-BH625_ses-20241206T181131_ecephys/pipeline-lfp/job-261009d4e669/code/submitted_date-2026+10+09_time-05+04+00"}}
 {"bc6b5d91-9aee-4b81-83ee-b78573a2b399": {"001851": "sub-fly-23082021-091/sub-fly-23082021-091_ses-23082021-SS010162-UAS-CsChrimson-1-091_behavior+image+ogen/2c4a8b65-5e30-41a2-9296-73b2d1d64407_external_file_0.mp4"}}
 {"bc6b8ec8-203e-46fa-a4a9-306d151f7b70": {"000571": "sub-c03/ses-Longterm/ieeg/sub-c03_ses-Longterm_task-Stimulation_acq-rec_run-9_ieeg.mefd/CH7.timd/CH7-000000.segd/CH7-000000.tmet"}}
 {"bc6baa0b-ea3c-4c48-b310-d9cadb740f2c": {"000045": "sub-34ff50d4-42cf-41f7-8c38-ab631ca84d74/sub-34ff50d4-42cf-41f7-8c38-ab631ca84d74_ses-6548d4ff-6747-431a-a9dd-06ab41c752b9_behavior.nwb"}}

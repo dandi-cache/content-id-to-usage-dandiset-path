@@ -255,6 +255,7 @@
 {"901b2b56-4476-46cc-b4e7-d0c21d02eb2a": {"000571": "sub-c03/ses-chronicRecordings/ieeg/sub-c03_ses-chronicRecordings_task-rest_acq-day28_run-01_ieeg.mefd/Ch24.timd/Ch24-000000.segd/Ch24-000000.tidx"}}
 {"901ba193-d54b-4be4-9ee2-a5d96966e168": {"001176": "sub-24741/sub-24741_ses-24741-16-1-Ach-V1_ophys.nwb"}}
 {"901bad2f-24e6-4921-b5d6-b3f4279679b8": {"000571": "sub-c01/ses-BSEPs/ieeg/sub-c01_ses-BSEPs_task-frontal_acq-day333_run-01_ieeg.mefd/Ch7.timd/Ch7-000000.segd/Ch7-000000.tidx"}}
+{"901bb809-426d-4af5-81f9-a4c568b1ed98": {"001697": "derivatives/dandisets-000/dandiset-000409/sub-CSH-ZAD-022/sub-CSH-ZAD-022_ses-b81e3e11-9a60-4114-b894-09f85074d9c3_desc-raw_ecephys/pipeline-aind+ephys/job-2610097bbb7e/derivatives/visualization/block0_acquisition-ElectricalSeriesProbe00AP_recording1/drift_map.png"}}
 {"901bbefe-760b-4a7f-834d-a522dc731ca7": {"000571": "sub-c01/ses-chronicStimulation/ieeg/sub-c01_ses-chronicStimulation_task-occipital_acq-day381_run-01_ieeg.mefd/Ch14.timd/Ch14-000000.segd/Ch14-000000.tmet"}}
 {"901bdb44-d84b-415a-9742-e8ddadccd777": {"000026": "sub-I60/ses-SPIM/micr/sub-I60_ses-SPIM_sample-BrocaAreaS36_stain-NeuN_chunk-22_SPIM.json"}}
 {"901c046c-85aa-4852-a5b7-e09843f9d298": {"000571": "sub-c01/ses-functional/ieeg/sub-c01_ses-functional_task-sensorimotor_acq-day799_run-05_ieeg.mefd/Ch4.timd/Ch4-000000.segd/Ch4-000000.tdat"}}
@@ -11973,6 +11974,7 @@
 {"953abbdd-6ab4-41d6-96b0-59cc310b0531": {"000026": "derivatives/sub-I48/ses-SPIM/micr/manual-annotation/sub-I48_ses-SPIM_sample-BrocaAreaS01_stain-NeuN_SPIM_pos-116-10886-5052.marker"}}
 {"953ac7ee-420a-4830-adad-5e829fd16f89": {"000467": "sub-ant3-m4-d26-y2022/sub-ant3-m4-d26-y2022_ses-m4-d26-y2022-ant3-1x-isopropanol-40-t196-z125um_ophys.nwb"}}
 {"953ae522-ceb0-4899-af79-88c67e4a419b": {"000026": "sub-I60/ses-SPIM/micr/sub-I60_ses-SPIM_sample-BrocaAreaS17_stain-Calretinin_chunk-17_SPIM.ome.tif"}}
+{"953af47c-826b-4de7-9a24-e9cee4cc1dd6": {"001697": "derivatives/dandisets-000/dandiset-000409/sub-CSH-ZAD-022/sub-CSH-ZAD-022_ses-b81e3e11-9a60-4114-b894-09f85074d9c3_desc-raw_ecephys/pipeline-aind+ephys/job-2610097bbb7e/logs/report.html"}}
 {"953b11dd-d25c-496c-b2cb-0013ee5b1d45": {"000571": "sub-c03/ses-BSEPs/ieeg/sub-c03_ses-BSEPs_task-temporal_acq-day164_run-01_ieeg.mefd/ImplantLostSample.timd/ImplantLostSample-000000.segd/ImplantLostSample-000000.tdat"}}
 {"953b36ca-1dec-4e0e-8eed-e7321f323782": {"000231": "sourcedata/sub-267CR/sub-267CR_ses-20200331T161053_behavior+ecephys+image/sort20200406072050/spike_times.npy"}}
 {"953b37eb-d6f1-48e4-8bf6-45219cfe9eef": {"000026": "sub-I60/ses-SPIM/micr/sub-I60_ses-SPIM_sample-BrocaAreaS23_stain-Calretinin_chunk-00_SPIM.ome.tif"}}
@@ -24457,6 +24459,7 @@
 {"9ac78f60-b8d5-40ec-a413-d68df63540c7": {"001514": "sub-OU23A5/micr/sub-OU23A5_sample-S11_FLUO.tif"}}
 {"9ac79d93-1e30-4fc8-b29a-532c85bd3742": {"000571": "sub-c04/ses-chronicStimulation/ieeg/sub-c04_ses-chronicStimulation_task-stim50Hz_acq-day115_run-01_ieeg.mefd/Ch19.timd/Ch19-000000.segd/Ch19-000000.tmet"}}
 {"9ac7b35d-c148-45aa-b627-1827cc41551b": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim1318001_run-16_ieeg.mefd/CH22.timd/CH22-000000.segd/CH22-000000.tdat"}}
+{"9ac81c22-40a5-4630-9f0d-685e74ecfe11": {"001697": "derivatives/dandisets-000/dandiset-000409/sub-CSH-ZAD-022/sub-CSH-ZAD-022_ses-b81e3e11-9a60-4114-b894-09f85074d9c3_desc-raw_ecephys/pipeline-aind+ephys/job-2610097bbb7e/derivatives/visualization/block0_acquisition-ElectricalSeriesProbe00AP_recording1/traces_full_seg0.png"}}
 {"9ac82760-efc0-490a-9970-339ced92fd90": {"000026": "sub-I38/ses-SPIM/micr/sub-I38_ses-SPIM_sample-BrocaAreaS14_stain-Nuclei_chunk-46_SPIM.json"}}
 {"9ac82f88-98bc-44e3-b01d-4f444beea6dc": {"000571": "sourcedata/sub-c01/ses-chronicImpedance/day1033R01.txt"}}
 {"9ac8ae7a-ef6d-4d6d-b891-66b733453b8b": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Passive_acq-rec_run-108_ieeg.json"}}
@@ -31111,6 +31114,7 @@
 {"9dbbe17b-99ac-4473-9a38-769b16818d2e": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim612001_run-34_ieeg.mefd/CH16.timd/CH16-000000.segd/CH16-000000.tmet"}}
 {"9dbc060f-404b-4788-afc0-947578d338fa": {"000571": "sub-c01/ses-closedLoop/ieeg/sub-c01_ses-closedLoop_task-alpha_acq-day956_run-13_ieeg.mefd/Ch7.timd/Ch7-000000.segd/Ch7-000000.tmet"}}
 {"9dbc4d10-67df-487c-ac14-2296098f2605": {"000109": "sub-849052252/sub-849052252_ses-852555856_icephys.nwb"}}
+{"9dbc5920-2cad-4c15-ad25-4b18975cad8d": {"001697": "derivatives/dandisets-001/dandiset-001250/sub-mearec-synthetics-s2/sub-mearec-synthetics-s2_ecephys/pipeline-lfp/job-26100981a7d7/code/submitted_date-2026+10+09_time-05+03+01"}}
 {"9dbc6967-c733-4fa8-bc4b-fef73f8c98f8": {"001634": "sub-Olive/sub-Olive_ses-Olive-20220711_obj-1h7yhf8.nwb"}}
 {"9dbc727d-7338-4b37-95dc-cb563691250b": {"000026": "sub-I60/ses-SPIM/micr/sub-I60_ses-SPIM_sample-BrocaAreaS50_stain-Nuclei_chunk-03_SPIM.json"}}
 {"9dbc7b5a-1db1-4d47-b26d-5fcb0d54d29c": {"000363": "sub-484676/sub-484676_ses-20210414T121243_behavior+ecephys+ogen.nwb"}}
