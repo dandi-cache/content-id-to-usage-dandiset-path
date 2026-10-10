@@ -3549,6 +3549,7 @@
 {"5180cb61-8a6b-44df-a18b-677dd921c77f": {"001412": "derivatives/james/tests/sub-MF282-ch2_2.ome.zarr"}}
 {"5180e066-dfc9-4d0a-8b94-17e63a80e374": {"000571": "sub-c01/ses-closedLoop/ieeg/sub-c01_ses-closedLoop_task-alpha_acq-day956_run-02_ieeg.mefd/Ch14.timd/Ch14-000000.segd/Ch14-000000.tdat"}}
 {"5180e0c5-c6f5-4ab8-804b-bf4b0596dafd": {"001623": "sub-20230909-15-40-07/sub-20230909-15-40-07_ses-20230909T154007.nwb"}}
+{"51810090-c354-4d1f-bfa8-0861b9bcd1c7": {"001697": "derivatives/dandisets-001/dandiset-001177/sub-E0/sub-E0_ses-Saline-openField-E0_ecephys/pipeline-aind+ephys/job-26100905ab1e/derivatives/visualization/rms.png"}}
 {"518109bb-4843-46ed-874e-b5e252872085": {"000571": "sub-c02/ses-BSEPs/ieeg/sub-c02_ses-BSEPs_task-RANT_acq-day72_run-02_ieeg.mefd/Ch29.timd/Ch29-000000.segd/Ch29-000000.tidx"}}
 {"51811403-690c-4eca-a2f1-f16d28b978e6": {"000571": "sub-c03/ses-chronicRecordings/ieeg/sub-c03_ses-chronicRecordings_task-rest_acq-day122_run-01_ieeg.mefd/Ch28.timd/Ch28-000000.segd/Ch28-000000.tmet"}}
 {"51811c5b-cd14-422d-a799-c73f9d681f91": {"000405": "sub-s3/sub-s3_ses-Al-T3g-111618.nwb"}}
@@ -4765,6 +4766,7 @@
 {"52086ab2-10dd-4e70-ad16-31d26ec1adef": {"000571": "sub-c01/ses-chronicStimulation/ieeg/sub-c01_ses-chronicStimulation_task-frontal_acq-day378_run-01_ieeg.json"}}
 {"5208708a-a63d-4957-9bb6-882a0a9a5497": {"001634": "sub-Winnie/sub-Winnie_ses-Winnie-20220719_obj-iypu2v.nwb"}}
 {"5208789b-3b25-4d5f-8add-6ba6789c0ee2": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim2328001_run-7_ieeg.mefd/state_PhaseInSequence.timd/state_PhaseInSequence-000000.segd/state_PhaseInSequence-000000.tdat"}}
+{"52088e61-135a-4e8d-b813-aca024db26ef": {"001697": "derivatives/dandisets-001/dandiset-001177/sub-E0/sub-E0_ses-Saline-openField-E0_ecephys/pipeline-aind+ephys/job-26100905ab1e/derivatives/visualization/quality_control.json"}}
 {"5208a008-94fc-4dd5-8f77-d7c9f36dbf99": {"000026": "sub-I60/ses-SPIM/micr/sub-I60_ses-SPIM_sample-BrocaAreaS22_stain-Nuclei_chunk-12_SPIM.json"}}
 {"5208a823-55ec-4e46-829b-6d43ada369cc": {"000571": "sub-c05/ses-chronicRecordings/ieeg/sub-c05_ses-chronicRecordings_task-rest_acq-day1_run-03_ieeg.mefd/Ch30.timd/Ch30-000000.segd/Ch30-000000.tdat"}}
 {"5208e110-d772-493b-a719-97ff51ec8122": {"000571": "sub-c03/ses-chronicRecordings/ieeg/sub-c03_ses-chronicRecordings_task-rest_acq-day234_run-01_ieeg.mefd/ImplantControlValue.timd/ImplantControlValue-000000.segd/ImplantControlValue-000000.tdat"}}
@@ -10283,6 +10285,7 @@
 {"546a98db-7639-4181-855a-948a4e95299f": {"000142": "sub-902323111/sub-902323111_ses-907381276_icephys.nwb"}}
 {"546a9f23-da9c-4f08-aa7c-d6fe8420272a": {"001942": "sub-chimi/sub-chimi_ses-chimi-20200222_obj-gppqrf.nwb"}}
 {"546aa0a1-8660-4cf4-87c3-be96c80fffa4": {"000230": "sub-70375/sub-70375_ses-20170317T094453_behavior+ecephys.nwb"}}
+{"546ae51e-e562-48da-98f6-fa9112a947ee": {"001697": "derivatives/dandisets-001/dandiset-001634/sub-Frodo/sub-Frodo_ses-5_behavior+ecephys+image/pipeline-lfp/job-26101037c333/code/submit.sh"}}
 {"546b28af-636c-4fae-86f6-09b43eda3309": {"000026": "sub-I38/ses-SPIM/micr/sub-I38_ses-SPIM_sample-BrocaAreaS22_stain-Calretinin_chunk-39_SPIM.ome.tif"}}
 {"546b2aea-7189-4b3f-9a4b-f1e9388939c0": {"000045": "sub-6dcef540-d5f2-41d0-9233-55e0da87fe59/sub-6dcef540-d5f2-41d0-9233-55e0da87fe59_ses-1479e07d-e913-48cf-9a8f-da2c53b67e73_behavior+image.nwb"}}
 {"546b53ff-74c2-4bd1-8d02-4b7661cbb44d": {"000026": "sub-I38/ses-SPIM/micr/sub-I38_ses-SPIM_sample-BrocaAreaS28_stain-Somatostatin_chunk-06_SPIM.json"}}
@@ -12571,6 +12574,7 @@
 {"55656d32-1873-4eb7-b2c7-d17063e4a1fa": {"001611": "sub-25897/sub-25897_ses-20241108T131411_ecephys.nwb"}}
 {"556576ad-c86b-434e-9ab4-6bbaa4d5f3e4": {"000571": "sub-c01/ses-functional/ieeg/sub-c01_ses-functional_task-walking_acq-day666_run-01_ieeg.mefd/Ch20.timd/Ch20-000000.segd/Ch20-000000.tdat"}}
 {"55658f21-fafd-455e-a029-4810f9d7c9ea": {"001074": "sub-250913-SL1PL68-slice/sub-250913-SL1PL68-slice_ses-ch0-means-movie-nobg-cnmf-mr-raw-matched_ophys.nwb"}}
+{"55659304-fb43-49c8-adae-ea104bcedcf2": {"001697": "derivatives/dandisets-001/dandiset-001177/sub-E0/sub-E0_ses-Saline-openField-E0_ecephys/pipeline-aind+ephys/job-26100905ab1e/derivatives/visualization/block0_acquisition-ElectricalSeries_recording1/drift_map.png"}}
 {"55659646-21a3-499d-a60d-5af373a37b48": {"000571": "sub-c04/ses-Longterm/ieeg/sub-c04_ses-Longterm_task-Stimulation_acq-rec_run-2_ieeg.mefd/state_PhaseInSequence.timd/state_PhaseInSequence-000000.segd/state_PhaseInSequence-000000.tidx"}}
 {"5565b611-5ce7-41fa-9f88-0bff4cc42382": {"000571": "sub-c02/ses-chronicStimulation/ieeg/sub-c02_ses-chronicStimulation_task-stim_acq-day79_run-02_ieeg.mefd/Ch19.timd/Ch19-000000.segd/Ch19-000000.tmet"}}
 {"5565bb0a-75bb-4571-bf47-8c009740fa39": {"000711": "sub-435431/sub-435431_ses-20190619T104553_obj-tr7lbu_image+ophys.nwb"}}
@@ -13562,6 +13566,7 @@
 {"55d4c1b4-77f8-402f-8d34-742006c596d7": {"000026": "sub-I38/ses-SPIM/micr/sub-I38_ses-SPIM_sample-BrocaAreaS03_stain-NeuN_chunk-41_SPIM.ome.tif"}}
 {"55d4c952-3d8d-45ef-9789-0f85266afda9": {"000336": "sub-641331/sub-641331_ses-1237608949-acq-1237715847_ophys.nwb"}}
 {"55d4cb55-7ec0-4b77-a13e-63b1da1c7776": {"000571": "sub-c01/ses-chronicRecordings/ieeg/sub-c01_ses-chronicRecordings_task-rest_acq-day210_run-02_ieeg.mefd/Ch1.timd/Ch1-000000.segd/Ch1-000000.tidx"}}
+{"55d4d32c-4a0c-43be-873f-cdf26ba9c25f": {"001697": "derivatives/dandisets-001/dandiset-001282/sub-C/sub-C_ses-20220218T140109_ecephys/pipeline-aind+ephys/job-2610099f0fb6/code/submitted_date-2026+10+09_time-23+56+41"}}
 {"55d4d9a0-96cc-41ef-8c64-1216260f88ea": {"000571": "sub-c02/ses-BSEPs/ieeg/sub-c02_ses-BSEPs_task-RANT_acq-day79_run-02_ieeg.mefd/Ch26.timd/Ch26-000000.segd/Ch26-000000.tidx"}}
 {"55d507dc-c35d-4767-ac09-07eddb66bb6d": {"000571": "sub-c01/ses-chronicRecordings/ieeg/sub-c01_ses-chronicRecordings_task-rest_acq-day690_run-01_ieeg.mefd/Ch22.timd/Ch22-000000.segd/Ch22-000000.tmet"}}
 {"55d50fb3-cc54-47bb-81aa-f07a51c59c47": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim612001_run-44_ieeg.mefd/CH8.timd/CH8-000000.segd/CH8-000000.tmet"}}

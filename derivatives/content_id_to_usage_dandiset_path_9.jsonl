@@ -5190,6 +5190,7 @@
 {"923a02e4-a647-4f30-a8ac-bef3078b13dd": {"000253": "sub-649324/sub-649324_ses-1233182025_probe-4_ecephys.nwb"}}
 {"923a134d-4d9d-4f0a-8402-b78a74ce8628": {"000571": "sub-c01/ses-chronicStimulation/ieeg/sub-c01_ses-chronicStimulation_task-occipital_acq-day359_run-01_ieeg.mefd/Ch27.timd/Ch27-000000.segd/Ch27-000000.tdat"}}
 {"923a345e-6304-490d-ae31-b8e6b8b49e73": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim612001_run-5_ieeg.mefd/CH9.timd/CH9-000000.segd/CH9-000000.tmet"}}
+{"923a577f-e7bf-428a-92ac-97ea4f5228be": {"001697": "derivatives/dandisets-001/dandiset-001132/sub-9E-5/sub-9E-5_ses-20240928T165423_ecephys/pipeline-aind+ephys/job-26100920cdbb/derivatives/visualization/block0_acquisition-ElectricalSeries_recording1/motion.png"}}
 {"923a648f-e0a9-4063-9c87-86c4ab0d4a72": {"000246": "sub-phpV9-10/sub-phpV9-10_ses-20230802_obj-19z8pnc_ophys.nwb"}}
 {"923a8beb-f8da-4c62-9375-88be41deb5df": {"000045": "sub-f01b97ab-0d2c-4825-b87f-b29f6daf3979/sub-f01b97ab-0d2c-4825-b87f-b29f6daf3979_ses-cb765d56-50fb-4ab7-8522-89ed4e9fe743_behavior+image.nwb"}}
 {"923a9f6c-dbb5-474c-9c37-514ee82221f0": {"001769": "rawdata/sub-I65/strips_raw/sub-I65_sample-slice014_chunk-0052_acq-camera-01.ome.zarr"}}
@@ -10840,6 +10841,7 @@
 {"949b8203-c1f0-47f1-b329-88d9724db188": {"000571": "sub-c01/ses-chronicRecordings/ieeg/sub-c01_ses-chronicRecordings_task-rest_acq-day952_run-01_ieeg.mefd/Ch30.timd/Ch30-000000.segd/Ch30-000000.tdat"}}
 {"949b8c48-4e81-45a2-97bd-d5df9e85d236": {"000711": "sub-489065/sub-489065_ses-20200128T102331_image.nwb"}}
 {"949bd85a-79c1-43a8-8b7e-1acf6a208e6c": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim1318001_run-1_ieeg.mefd/CH4.timd/CH4-000000.segd/CH4-000000.tmet"}}
+{"949bf961-1d28-415c-a7f4-fe45c85ec807": {"001697": "derivatives/dandisets-001/dandiset-001203/sub-CeA-NPX-01/sub-CeA-NPX-01_ses-20221220-Disc-NPX1-NPX2-g0-imec0_ecephys/pipeline-aind+ephys/job-261009b7b156/logs/trace.txt"}}
 {"949c22b1-347d-4164-b37e-59c06e12037d": {"000108": "sub-MITU01/ses-20211109h17m54s46/micr/sub-MITU01_ses-20211109h17m54s46_sample-105_stain-YO_run-1_chunk-7_SPIM.ome.zarr"}}
 {"949c4542-9fc5-4b63-9395-e4f77e706a93": {"000045": "sub-c056860e-7222-44ea-bb1a-7a0959195ae7/sub-c056860e-7222-44ea-bb1a-7a0959195ae7_ses-3a7bbb0e-948f-4b97-8da7-cb808465cbf4_behavior+image.nwb"}}
 {"949c791f-74b1-478d-88da-8af405740679": {"001832": "sub-ctrl-animal01-slice01-roi02/sub-ctrl-animal01-slice01-roi02_ses-MB++AChFP++pan++CTRL++none++WT++20250422191217_ophys.nwb"}}
@@ -14842,6 +14844,7 @@
 {"965c3f21-7d7a-431a-a04b-99c73f6c6698": {"001169": "sub-L005/sub-L005_ses-RWTautowait2-20211213-100718.nwb"}}
 {"965c4d60-d67b-4224-8349-9c66d83d50f3": {"000571": "sub-c04/ses-chronicStimulation/ieeg/sub-c04_ses-chronicStimulation_task-stim50Hz_acq-day165_run-02_ieeg.mefd/Ch8.timd/Ch8-000000.segd/Ch8-000000.tmet"}}
 {"965c7396-00a0-4549-b8c6-d489b6c293d1": {"000293": "sub-X2015-11-09-2015-11-09-0107/sub-X2015-11-09-2015-11-09-0107_icephys.nwb"}}
+{"965c7db1-e3cc-4d0b-ad1f-926ae2995493": {"001697": "derivatives/dandisets-000/dandiset-000897/sub-mahler/sub-mahler_ses-04132021_ecephys/pipeline-aind+ephys/job-261009e39e68/logs/job-25401356_slurm.log"}}
 {"965c87ac-09c8-41b5-b9f6-a0a39495129e": {"000571": "sub-c01/ses-chronicStimulation/ieeg/sub-c01_ses-chronicStimulation_task-temporal_acq-day352_run-01_ieeg.mefd/Ch2.timd/Ch2-000000.segd/Ch2-000000.tmet"}}
 {"965c9c14-13fe-44c0-bc0f-cb670185831b": {"000571": "sub-c01/ses-chronicStimulation/ieeg/sub-c01_ses-chronicStimulation_task-temporal_acq-day323_run-01_ieeg.mefd/Ch25.timd/Ch25-000000.segd/Ch25-000000.tdat"}}
 {"965cbdb0-8afe-4f26-958e-ae62f677f035": {"001203": "sub-G2B1-C4-6886-L-jackalope-DISC6UNP+TONES/sub-G2B1-C4-6886-L-jackalope-DISC6UNP+TONES_ses-G2B1-C4-6886_image+ophys/db3b2372-bb16-4ada-9563-d5d2066ff6c5_external_file_2.avi"}}
@@ -25964,6 +25967,7 @@
 {"9b2d2759-e129-4981-b4c8-cc1c398c6b96": {"001785": "IF/IF_CC1_MCC_CB_mkNT/N613_RW_5.tif"}}
 {"9b2d2e43-a60b-49bd-bceb-bc85bedef4ce": {"000571": "sub-c04/ses-chronicStimulation/ieeg/sub-c04_ses-chronicStimulation_task-baseline_acq-day184_run-01_ieeg.mefd/Ch28.timd/Ch28-000000.segd/Ch28-000000.tmet"}}
 {"9b2d3fe4-a561-44e9-a96a-a2c4a21f3c3a": {"000108": "sub-MITU01/ses-20211020h18m48s11/micr/sub-MITU01_ses-20211020h18m48s11_sample-98_stain-NN_run-1_chunk-9_SPIM.ome.zarr"}}
+{"9b2d45b5-e821-46e5-826f-ff2b5d5ac04a": {"001697": "derivatives/dandisets-001/dandiset-001687/sub-Ephys81/sub-Ephys81_ses-20240703-sp-session-1_ecephys/pipeline-aind+ephys/job-2610107a3369/dataset_description.json"}}
 {"9b2d53b1-061d-44f1-9560-7db8f3113ff4": {"001942": "sub-wilbur/sub-wilbur_ses-wilbur-20210328_obj-z0xyt4_behavior.nwb"}}
 {"9b2d5967-5a9c-43a2-8c1b-721bc2195994": {"001942": "sub-Senor/sub-Senor_ses-senor-20201101_obj-1emi89z.nwb"}}
 {"9b2d7a39-a28d-4554-9ab0-d196c7aba5f3": {"000946": "sub-BH513/sub-BH513_ses-20231001T205314_ecephys.nwb"}}
@@ -32134,6 +32138,7 @@
 {"9dde7f56-466a-4a6e-a252-831b60efe12a": {"000571": "sub-c04/ses-Functional/ieeg/sub-c04_ses-Functional_task-Auditory_acq-rec_run-8_ieeg.mefd/CH5.timd/CH5-000000.segd/CH5-000000.tdat"}}
 {"9ddeaacf-56ed-4a72-8299-255717a44058": {"000363": "sub-460434/sub-460434_ses-20191114T142520_behavior+ecephys+ogen.nwb"}}
 {"9ddeb8b9-56b4-468f-b8f4-c749cf38fb44": {"000571": "sub-c01/ses-chronicRecordings/ieeg/sub-c01_ses-chronicRecordings_task-rest_acq-day1096_run-01_ieeg.mefd/Ch7.timd/Ch7-000000.segd/Ch7-000000.tdat"}}
+{"9ddece0f-a334-46af-a0b8-b2a91a98a3a4": {"001697": "derivatives/dandisets-001/dandiset-001177/sub-E0/sub-E0_ses-Saline-openField-E0_ecephys/pipeline-aind+ephys/job-26100905ab1e/code/submitted_date-2026+10+09_time-22+43+12"}}
 {"9dded796-2a77-42de-b0c5-58c1cb6178c1": {"001412": "rawdata/sub-MF283/sub-MF283_sample-slice131_chunk-0002_OCT.nii.gz"}}
 {"9ddf2aea-6119-4082-8ebb-edde2b79a9c4": {"001412": "derivatives/sub-MF283/strips_raw/sample-slice132/sub-MF283_sample-slice132_chunk-0010_acq-camera-01.ome.zarr"}}
 {"9ddf3a4c-726a-43aa-8e8b-4a7174937b1e": {"001412": "derivatives/sub-MN131/micr/ch1_MIPs/ch1_xy_MIP_run18_y6.tiff"}}

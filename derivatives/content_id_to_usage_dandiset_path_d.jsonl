@@ -4095,6 +4095,7 @@
 {"d1c71b2e-9082-4512-a499-f19187306723": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim612001_run-44_ieeg.mefd/CH22.timd/CH22-000000.segd/CH22-000000.tidx"}}
 {"d1c72d10-2350-4353-af50-5521a0c62387": {"001455": "sub-899526618/sub-899526618_ses-903867981_icephys.nwb"}}
 {"d1c734a6-f6f8-4207-86f0-aca1d9202e85": {"001449": "sub-m2733/ses-20260216T161654/micr/sub-m2733_ses-20260216T161654_sample-brain_stain-cFos_MIP/sub-m2733_ses-20260216T161654_sample-brain_stain-cFos_chunk-009_MIP.tif"}}
+{"d1c7464f-d3b0-4221-963b-6b71a50c267b": {"001697": "derivatives/dandisets-001/dandiset-001177/sub-E0/sub-E0_ses-Saline-openField-E0_ecephys/pipeline-aind+ephys/job-26100905ab1e/logs/report.html"}}
 {"d1c74ab3-f856-46f8-b5c2-faaf9f7b7327": {"001412": "rawdata/sub-MF283/sub-MF283_sample-slice148_chunk-0066_OCT.nii.gz"}}
 {"d1c754c8-5a29-43e9-975e-c83a6a09ca4a": {"000711": "sub-440631/sub-440631_ses-20190415T093714_image.nwb"}}
 {"d1c761f4-70c3-45f9-a524-ac3f69cf7a8f": {"000026": "sub-I60/ses-SPIM/micr/sub-I60_ses-SPIM_sample-BrocaAreaS13_stain-Nuclei_chunk-05_SPIM.json"}}
@@ -36644,6 +36645,7 @@
 {"dfe043ca-eafb-419c-b30f-6f3146b3baa5": {"000571": "sub-c02/ses-chronicRecordings/ieeg/sub-c02_ses-chronicRecordings_task-rest_acq-day67_run-03_ieeg.mefd/ImplantHumidity.timd/ImplantHumidity-000000.segd/ImplantHumidity-000000.tmet"}}
 {"dfe057f8-7efe-4712-959a-422cabeb01ce": {"000026": "sub-I38/ses-SPIM/micr/sub-I38_ses-SPIM_sample-BrocaAreaS51_stain-Calretinin_chunk-19_SPIM.ome.tif"}}
 {"dfe060a0-d9ef-4a79-b458-faf807f07eae": {"001412": "rawdata/sub-MF283/sub-MF283_sample-slice164_chunk-0025_OCT.nii.gz"}}
+{"dfe0613a-293b-4976-826f-e77fcabbc099": {"001697": "derivatives/dandisets-001/dandiset-001687/sub-Ephys81/sub-Ephys81_ses-20240703-sp-session-1_ecephys/pipeline-aind+ephys/job-2610107a3369/code/submit.sh"}}
 {"dfe063c3-a2e7-48f2-89d8-9802585270df": {"001169": "sub-J064/sub-J064_ses-RWTautowait2-20230328-094218.nwb"}}
 {"dfe0809e-1109-4d27-942b-40de238fde08": {"000026": "sub-I60/ses-SPIM/micr/sub-I60_ses-SPIM_sample-BrocaAreaS48_stain-Nuclei_chunk-41_SPIM.ome.tif"}}
 {"dfe11df1-0a22-4258-bbd6-425889421376": {"001942": "sub-j16/sub-j16_ses-j16-20210706_obj-hx81q7.nwb"}}
