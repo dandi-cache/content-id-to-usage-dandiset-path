@@ -9032,6 +9032,7 @@
 {"93ce7e67-3b0e-45b8-bb63-d246702a94fb": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Stimulation_acq-Stim2328001_run-13_ieeg.mefd/CH17.timd/CH17-000000.segd/CH17-000000.tidx"}}
 {"93ce9300-5788-4e44-a269-ab3a348f0dfb": {"001412": "rawdata/sub-mouse2026/strips_raw/sub-mouse2026_sample-slice019_chunk-0012_acq-camera-01.ome.zarr"}}
 {"93ce979a-584f-4360-9e15-31798225efae": {"000571": "sub-c02/ses-intraop/ieeg/sub-c02_ses-intraop_task-recording_acq-passive57db_run-01_ieeg.mefd/Ch10.timd/Ch10-000000.segd/Ch10-000000.tmet"}}
+{"93ceb13f-c10a-4598-9d52-de631ba561aa": {"001697": "derivatives/dandisets-000/dandiset-000957/sub-ZYE-0021/sub-ZYE-0021_ses-4_ecephys+image/pipeline-aind+ephys/job-261009791419/logs/nextflow.log"}}
 {"93cebb96-94ae-4b95-8558-88d701a47338": {"000571": "sub-c02/ses-BSEPs/ieeg/sub-c02_ses-BSEPs_task-LHPC_acq-day22_run-06_ieeg.mefd/Ch24.timd/Ch24-000000.segd/Ch24-000000.tmet"}}
 {"93cebce7-6389-4c91-a7d3-3375e4af6281": {"001776": "sub-A20W/sub-A20W_ses-20220421T175345_icephys.nwb"}}
 {"93cec4d6-d5a4-45df-8994-371c2477697a": {"001550": "sub-P013/sub-P013_ses-TaskSwitch4-160402a.nwb"}}
@@ -35800,6 +35801,7 @@
 {"9f4d6eb7-c5f2-4bac-99ee-742eb5fee1cf": {"000571": "sub-c01/ses-chronicRecordings/ieeg/sub-c01_ses-chronicRecordings_task-rest_acq-day969_run-01_ieeg.mefd/RequestedStimulation.timd/RequestedStimulation-000000.segd/RequestedStimulation-000000.tmet"}}
 {"9f4dc52a-0dfe-45b5-98fd-2f4e4603386c": {"000571": "sub-c02/ses-Longterm/ieeg/sub-c02_ses-Longterm_task-Passive_acq-rec_run-146_ieeg.mefd/CH26.timd/CH26-000000.segd/CH26-000000.tdat"}}
 {"9f4dc61d-7953-4ea0-af72-8f64df1cc514": {"000026": "sub-I38/ses-SPIM/micr/sub-I38_ses-SPIM_sample-BrocaAreaS41_stain-Calretinin_chunk-26_SPIM.json"}}
+{"9f4e5525-4baf-4229-8a2f-d775491527a2": {"001697": "derivatives/paths.tsv"}}
 {"9f4e555d-bb7a-4aa8-8721-27c3bbcdfbf1": {"000571": "sub-c02/ses-chronicRecordings/ieeg/sub-c02_ses-chronicRecordings_task-rest_acq-day85_run-01_ieeg.mefd/Ch31.timd/Ch31-000000.segd/Ch31-000000.tmet"}}
 {"9f4e6733-2ac1-4ec7-8a3f-f33f2d1f1da1": {"000020": "sub-648087036/sub-648087036_ses-649387242_icephys.nwb"}}
 {"9f4e6811-5ef8-4ac1-a8a5-5b9d1f1f742e": {"001881": "sub-W/sub-W_ses-20230221_obj-1oicj52_ecephys.nwb"}}
