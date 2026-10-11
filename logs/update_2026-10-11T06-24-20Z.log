@@ -1,0 +1,20 @@
+2026-10-11T06:24:20Z INFO Logging to /tmp/logs/update_2026-10-11T06-24-20Z.log.
+2026-10-11T06:24:20Z INFO Update content-id-to-usage-dandiset-path (base directory /tmp).
+2026-10-11T06:24:22Z INFO 588511 content IDs are already unique; 12050 need a heuristic.
+2026-10-11T06:24:24Z INFO Fetching creation times for 3 dandisets from S3.
+2026-10-11T06:24:24Z INFO Resolved 3 dandiset creation times.
+2026-10-11T06:24:25Z INFO Processing 12 items (600559 already recorded).
+2026-10-11T06:25:22Z INFO [1/12] 32fb6873-0e71-4913-88fa-7ee9e5eefbdb: attributed to 000571; 56.7 s; peak memory 838 MiB.
+2026-10-11T06:25:26Z INFO [2/12] 3cef56cc-7fc8-496c-92b0-b48f7b30c3d9: attributed to 001697; 4.3 s; peak memory 838 MiB.
+2026-10-11T06:25:30Z INFO [3/12] 4766f2dd-8a5b-4488-8334-ebf13f5ba9a5: attributed to 001697; 3.9 s; peak memory 838 MiB.
+2026-10-11T06:25:30Z INFO [4/12] 4b314413-ce03-4bde-bb49-5bbb28a45cdb: attributed to 000571; 0.2 s; peak memory 838 MiB.
+2026-10-11T06:25:31Z INFO [5/12] 4f64532c-9ec8-4222-b082-3d495db115fc: attributed to 000571; 0.3 s; peak memory 838 MiB.
+2026-10-11T06:25:45Z INFO [6/12] 57dfe0f6-8e34-4225-a438-65c0ac8b1832: attributed to 001697; 14.5 s; peak memory 838 MiB.
+2026-10-11T06:25:46Z INFO [7/12] 87d78398-5ed1-415c-984f-891f95c2fd31: attributed to 000571; 0.6 s; peak memory 838 MiB.
+2026-10-11T06:25:52Z INFO [8/12] 9b457c99-e613-4d5b-a81c-4362faef0cbb: attributed to 001697; 6.2 s; peak memory 838 MiB.
+2026-10-11T06:25:52Z INFO [9/12] b157c4bf-facf-475a-a862-b81187b2bd88: attributed to 000571; 0.3 s; peak memory 838 MiB.
+2026-10-11T06:25:53Z INFO [10/12] c22c46a1-ca4a-4d7d-a4e0-574e459140b0: attributed to 000571; 0.2 s; peak memory 838 MiB.
+2026-10-11T06:25:53Z INFO [11/12] e5ace723-19e2-480b-871d-4573a216f287: attributed to 000571; 0.2 s; peak memory 838 MiB.
+2026-10-11T06:25:56Z INFO [12/12] f8dbca55-1b58-418b-aac9-6c44a2a02dc8: attributed to 001697; 3.6 s; peak memory 838 MiB.
+2026-10-11T06:25:58Z INFO Wrote 600561 records to /tmp/derivatives/content_id_to_usage_dandiset_path.jsonl (12 new, 0 failed) in 1.5 min (peak memory 846 MiB).
+2026-10-11T06:25:58Z INFO Resolved 12 ambiguous content IDs; 12050 of 12050 are now current, leaving 0 for later runs.
