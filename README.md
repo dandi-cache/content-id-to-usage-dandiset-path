@@ -11,7 +11,7 @@ Updated frequently.
 
 Primarily for use by developers.
 
-A second output, `derivatives/content_id_to_resolved_from.zarr`, records a short digest of the upstream entry each heuristic answer was resolved from.
+A second output, `content_id_to_resolved_from`, records a short digest of the upstream entry each heuristic answer was resolved from.
 It is bookkeeping rather than data, and it is what makes the cache accumulative: a content ID's answer depends on nothing but its own upstream entry, so an unchanged digest means the recorded answer is still correct and costs no further network round trips.
 A content ID that gains a Dandiset or a path gets a different digest and is resolved again.
 Content IDs that were already unique upstream need no heuristic and so have no entry here.
@@ -20,20 +20,20 @@ Content IDs that were already unique upstream need no heuristic and so have no e
 
 ## One-time use
 
-`dist` publishes each output as a [Zarr](https://zarr.dev/) store: the cache itself is `derivatives/content_id_to_usage_dandiset_path.zarr/`, with the cache's other outputs beside it as stores of the same kind (`derivatives/content_id_to_resolved_from.zarr/`).
-A store is one array of [JSON Lines](https://jsonlines.org/) text cut into chunk files, each holding whole lines and gzip-compressed.
-It can be read with the standard library alone, or opened remotely with any Zarr library.
+`dist` publishes each output as one compressed [JSON Lines](https://jsonlines.org/) file.
+The cache itself is `derivatives/content_id_to_usage_dandiset_path.jsonl.gz`, with the other output beside it as `derivatives/content_id_to_resolved_from.jsonl.gz`.
 
 ### Python API (recommended)
 
-The chunk files are gzip-compressed [JSON Lines](https://jsonlines.org/): list them, then read them in order as you would any JSONL files.
-
 ```python
-import gzip, json, urllib.request
+import gzip
+import json
+import urllib.request
 
-chunks = "https://api.github.com/repos/dandi-cache/content-id-to-usage-dandiset-path/contents/derivatives/content_id_to_usage_dandiset_path.zarr/stream/c?ref=dist"
-files = sorted((entry["download_url"] for entry in json.load(urllib.request.urlopen(chunks))), key=lambda url: int(url.rsplit("/", 1)[1]))
-content_id_to_usage_dandiset_path = {key: value for url in files for line in gzip.decompress(urllib.request.urlopen(url).read()).decode().splitlines() if line for key, value in json.loads(line).items()}
+url = "https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/dist/derivatives/content_id_to_usage_dandiset_path.jsonl.gz"
+with urllib.request.urlopen(url) as response:
+    lines = gzip.decompress(data=response.read()).decode("utf-8").splitlines()
+content_id_to_usage_dandiset_path = {key: value for line in lines if line for key, value in json.loads(line).items()}
 ```
 
 Each line is a record of the form:
@@ -42,40 +42,10 @@ Each line is a record of the form:
 {"<content_id>": {"<dandiset_id>": "<path>"}}
 ```
 
-### Remote Zarr store
-
-Anything that opens Zarr can open the store over HTTP, reading only the chunks it needs.
-The group's `zarr.json` carries the array's metadata, so opening it takes one request:
-
-```bash
-pip install "zarr>=3" fsspec aiohttp
-```
-
-```python
-import json
-
-import zarr
-
-url = "https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/dist/derivatives/content_id_to_usage_dandiset_path.zarr"
-stream = zarr.open_group(url, mode="r")["stream"]
-print(stream.shape, stream.chunks)  # Bytes in all, and bytes per chunk.
-
-# The first chunk, fetched and decompressed on its own: whole lines, each `{"<key>": <value>}`.
-first_chunk = stream[: stream.chunks[0]].tobytes().decode("utf-8")
-for line in first_chunk.splitlines():
-    if line.strip():
-        print(json.loads(line))
-        break
-```
-
-Reading `stream[:]` returns the whole text; to read it in pieces, step through it by `stream.chunks[0]`, as each chunk is fetched whole.
-
 ### Save to file
 
-A raw URL cannot be listed, so to fetch every chunk at once clone the `dist` branch, which holds nothing else:
-
 ```bash
-git clone --branch dist --depth 1 https://github.com/dandi-cache/content-id-to-usage-dandiset-path.git
+curl https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/refs/heads/dist/derivatives/content_id_to_usage_dandiset_path.jsonl.gz -o content_id_to_usage_dandiset_path.jsonl.gz
 ```
 
 
@@ -112,13 +82,16 @@ The container image is the authoritative runtime, but you can recreate the envir
 uv run --project envs python code/update.py
 ```
 
-Each output is a store in the clone, with every chunk gzip-compressed:
+Each output is one compressed JSON Lines file in the clone of `dist`:
 
 ```python
-import gzip, json, pathlib
+import gzip
+import json
+import pathlib
 
-chunks = sorted(pathlib.Path("content-id-to-usage-dandiset-path/derivatives/content_id_to_usage_dandiset_path.zarr/stream/c").iterdir(), key=lambda path: int(path.name))
-content_id_to_usage_dandiset_path = {key: value for chunk in chunks for line in gzip.decompress(chunk.read_bytes()).decode().splitlines() if line for key, value in json.loads(line).items()}
+path = pathlib.Path("content-id-to-usage-dandiset-path/derivatives/content_id_to_usage_dandiset_path.jsonl.gz")
+lines = gzip.decompress(data=path.read_bytes()).decode("utf-8").splitlines()
+content_id_to_usage_dandiset_path = {key: value for line in lines if line for key, value in json.loads(line).items()}
 ```
 
 
