@@ -95,6 +95,27 @@ content_id_to_usage_dandiset_path = {key: value for line in lines if line for ke
 ```
 
 
+## Reading the `derivatives` branch
+
+Each output is kept on the `derivatives` branch as a [Zarr](https://zarr.dev/) v3 store of JSON Lines: a one-dimensional `uint8` array whose bytes are the lines, padded with newlines to the end of its last chunk.
+A key recorded more than once keeps its last line, which the dictionary below does by itself.
+
+```python
+import json
+
+import zarr  # zarr>=3, with fsspec and aiohttp to read over HTTP
+
+url = "https://raw.githubusercontent.com/dandi-cache/content-id-to-usage-dandiset-path/derivatives/derivatives/content_id_to_usage_dandiset_path.zarr"
+stream = zarr.open_group(url, mode="r")["stream"]
+lines = stream[:].tobytes().decode("utf-8").splitlines()
+content_id_to_usage_dandiset_path = {key: value for line in lines if line for key, value in json.loads(line).items()}
+```
+
+The other output, `content_id_to_resolved_from.zarr`, is a store beside it under the same `derivatives/` path.
+
+Without Zarr, each chunk is a plain file of whole lines at `derivatives/content_id_to_usage_dandiset_path.zarr/stream/c/<n>`, read in order of `n`.
+
+
 ## How this cache is built
 
 The orchestration, the runtime library and the CI all come from elsewhere, so this repository holds only what is specific to this cache: `cache.toml` (what it is), `code/update.py` (the two resolution heuristics), `envs/pyproject.toml` (its dependencies, which the base image now supplies) and the schedule in `.github/workflows/update.yml`.
