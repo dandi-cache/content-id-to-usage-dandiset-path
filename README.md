@@ -42,9 +42,6 @@ Each line is a record of the form:
 {"<content_id>": {"<dandiset_id>": "<path>"}}
 ```
 
-An entry is not filed under its key: the chunks hold the entries in the order they were recorded, so looking up one means reading through them.
-To look up many, read it once as above, or clone the `derivatives` branch.
-
 ### Remote Zarr store
 
 Anything that opens Zarr can open the store over HTTP, reading only the chunks it needs.
@@ -106,8 +103,6 @@ For example, through `crontab -e`, add:
 ```
 
 This will minimize data overhead by only loading the most recent changes.
-
-
 
 ### Local development
 
