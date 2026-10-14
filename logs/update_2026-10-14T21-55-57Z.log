@@ -1,0 +1,25 @@
+2026-10-14T21:55:57Z INFO Logging to /tmp/logs/update_2026-10-14T21-55-57Z.log.
+2026-10-14T21:55:57Z INFO Update content-id-to-usage-dandiset-path (base directory /tmp).
+2026-10-14T21:56:00Z INFO 589898 content IDs are already unique; 12099 need a heuristic.
+2026-10-14T21:56:04Z INFO Fetching creation times for 2 dandisets from S3.
+2026-10-14T21:56:05Z INFO Resolved 2 dandiset creation times.
+2026-10-14T21:56:06Z INFO Processing 17 items (601997 already recorded).
+2026-10-14T21:56:06Z INFO [1/17] 0cb1bb65-a215-4a4c-a8e5-c9e0d49c7508: attributed to 001412; 0.3 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [2/17] 2b5428c6-b667-40c6-a257-61973cff5005: attributed to 001278; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [3/17] 3cbc2773-991a-46d4-8551-486edaddd2b0: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [4/17] 3e9268b0-2458-4241-8a7a-8525bd38c728: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [5/17] 4f0564f6-2a16-4bff-8d22-7d8a456a00db: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [6/17] 64909400-ee3f-4693-a8f6-eb2a579e3099: attributed to 001278; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [7/17] 685484a6-7f2b-4fe2-9e64-a8f619253fea: attributed to 001412; 0.0 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [8/17] 6d70fdd5-d833-49a0-8311-8d50d1e14d34: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [9/17] 70b84497-181c-4a6c-8c8a-1dc6eac661e3: attributed to 001278; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [10/17] 715f7747-f166-4204-958f-051e0413ad80: attributed to 001278; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [11/17] 7399b5ee-56c5-4f4e-a277-a02578b4e498: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:06Z INFO [12/17] 7c7ce301-8ce3-4aa9-bbfb-5cc29b4a4a62: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:07Z INFO [13/17] 825a22b1-19b2-4e12-b1fd-42f5906b7ad7: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:07Z INFO [14/17] 9e2af1d6-1e9b-4b50-bbaf-cad065631df0: attributed to 001278; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:07Z INFO [15/17] d6e69aa8-6a7e-4f83-bc1d-933112d0d083: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:07Z INFO [16/17] e6951a7d-f86c-4b17-a2a8-829c2bfaa026: attributed to 001412; 0.0 s; peak memory 967 MiB.
+2026-10-14T21:56:07Z INFO [17/17] e8e5ca15-bb2f-4b3d-ad96-2a9756be3b20: attributed to 001412; 0.1 s; peak memory 967 MiB.
+2026-10-14T21:56:08Z INFO Wrote 601997 records to /tmp/derivatives/content_id_to_usage_dandiset_path.zarr (17 new, 0 failed) in 0.0 min (peak memory 1030 MiB).
+2026-10-14T21:56:08Z INFO Resolved 17 ambiguous content IDs; 12099 of 12099 are now current, leaving 0 for later runs.
