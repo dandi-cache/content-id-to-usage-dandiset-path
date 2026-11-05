@@ -1,0 +1,6 @@
+2026-11-05T20:16:14Z INFO Logging to /tmp/logs/update_2026-11-05T20-16-14Z.log.
+2026-11-05T20:16:14Z INFO Update content-id-to-usage-dandiset-path (base directory /tmp).
+2026-11-05T20:16:18Z INFO 678717 content IDs are already unique; 12160 need a heuristic.
+2026-11-05T20:16:24Z INFO Processing 0 items (690877 already recorded).
+2026-11-05T20:16:30Z INFO Wrote 690877 records to /tmp/derivatives/content_id_to_usage_dandiset_path.zarr (0 new, 0 failed) in 0.0 min (peak memory 1237 MiB).
+2026-11-05T20:16:30Z INFO Resolved 0 ambiguous content IDs; 12160 of 12160 are now current, leaving 0 for later runs.
