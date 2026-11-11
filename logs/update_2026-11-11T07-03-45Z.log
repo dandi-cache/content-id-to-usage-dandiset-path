@@ -1,0 +1,19 @@
+2026-11-11T07:03:45Z INFO Logging to /tmp/logs/update_2026-11-11T07-03-45Z.log.
+2026-11-11T07:03:45Z INFO Update content-id-to-usage-dandiset-path (base directory /tmp).
+2026-11-11T07:03:50Z INFO 689695 content IDs are already unique; 12448 need a heuristic.
+2026-11-11T07:03:55Z INFO Fetching creation times for 1 dandisets from S3.
+2026-11-11T07:03:55Z INFO Resolved 1 dandiset creation times.
+2026-11-11T07:03:56Z INFO Processing 11 items (702132 already recorded).
+2026-11-11T07:03:56Z INFO [1/11] 10b79c0d-24bf-471f-9bc7-67e8bc61189d: attributed to 001412; 0.5 s; peak memory 1148 MiB.
+2026-11-11T07:03:57Z INFO [2/11] 2648dab2-23c6-4639-a866-b8e0be5f01ad: attributed to 001412; 0.3 s; peak memory 1148 MiB.
+2026-11-11T07:03:57Z INFO [3/11] 40c97842-4451-4131-ba81-d092b10c3941: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:03:57Z INFO [4/11] 51739791-65b5-4d7d-959b-e7c7351ee128: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:03:57Z INFO [5/11] 5d40a126-d1e4-441b-9da7-dc83c9070c10: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:03:57Z INFO [6/11] 83816906-3a15-45da-806d-a6e53b1265a7: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:03:58Z INFO [7/11] 98f45466-460d-4379-8675-cd5e138cb849: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:03:58Z INFO [8/11] a6a9113c-dbef-4ccf-bdf3-b89a4146c066: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:03:58Z INFO [9/11] b70f24bd-0e8e-4701-96a6-d75d9fea8177: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:03:58Z INFO [10/11] e0e74e62-7d2c-4127-80ca-adc58f930769: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:03:58Z INFO [11/11] fb27f129-ed35-4106-801e-b6a51f36d204: attributed to 001412; 0.2 s; peak memory 1148 MiB.
+2026-11-11T07:04:04Z INFO Wrote 702143 records to /tmp/derivatives/content_id_to_usage_dandiset_path.zarr (11 new, 0 failed) in 0.0 min (peak memory 1323 MiB).
+2026-11-11T07:04:04Z INFO Resolved 11 ambiguous content IDs; 12448 of 12448 are now current, leaving 0 for later runs.
