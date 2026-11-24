@@ -1,0 +1,19 @@
+2026-11-24T10:24:06Z INFO Logging to /tmp/logs/update_2026-11-24T10-24-06Z.log.
+2026-11-24T10:24:06Z INFO Update content-id-to-usage-dandiset-path (base directory /tmp).
+2026-11-24T10:24:11Z INFO 708894 content IDs are already unique; 36501 need a heuristic.
+2026-11-24T10:24:15Z INFO Fetching creation times for 3 dandisets from S3.
+2026-11-24T10:24:16Z INFO Resolved 3 dandiset creation times.
+2026-11-24T10:24:17Z INFO Processing 10 items (745395 already recorded).
+2026-11-24T10:24:18Z INFO [1/10] 045831cd-ccd4-4b7e-84f4-9981ad4f4949: attributed to 001697; 0.8 s; peak memory 1226 MiB.
+2026-11-24T10:24:18Z INFO [2/10] 1475b330-12c1-4da5-86ec-8549ed3f0bb8: attributed to 001697; 0.5 s; peak memory 1226 MiB.
+2026-11-24T10:24:39Z INFO [3/10] 57dfe0f6-8e34-4225-a438-65c0ac8b1832: attributed to 001697; 20.6 s; peak memory 1226 MiB.
+2026-11-24T10:24:46Z INFO [4/10] 5dc626a9-c36e-4dd3-80a7-6aeeddaf0297: attributed to 001697; 7.8 s; peak memory 1226 MiB.
+2026-11-24T10:24:47Z INFO [5/10] 73bc7f07-6bb6-4c6b-abe7-ce934532b47e: attributed to 001412; 0.5 s; peak memory 1226 MiB.
+2026-11-24T10:24:47Z INFO [6/10] 7678f606-094c-480f-92aa-468f2400617f: attributed to 001412; 0.4 s; peak memory 1226 MiB.
+2026-11-24T10:24:48Z INFO [7/10] 8500acfe-641d-4f99-9a87-e8bd887be19c: attributed to 001697; 0.6 s; peak memory 1226 MiB.
+2026-11-24T10:24:50Z INFO [8/10] c46361fd-7eac-4091-ac8d-03a840917f41: attributed to 001697; 1.8 s; peak memory 1226 MiB.
+2026-11-24T10:24:51Z INFO [9/10] ce6dfe5f-deb8-4055-a6db-3b7e4986eff1: attributed to 001697; 1.8 s; peak memory 1226 MiB.
+2026-11-24T10:24:52Z INFO [10/10] dd45f878-4f41-4aa3-882c-e29b20890ef4: attributed to 001697; 0.6 s; peak memory 1226 MiB.
+2026-11-24T10:24:58Z INFO Wrote 745395 records to /tmp/derivatives/content_id_to_usage_dandiset_path.zarr (10 new, 0 failed) in 0.6 min (peak memory 1392 MiB).
+2026-11-24T10:24:58Z INFO Batch summary: considered=10 new=10 failed=0 left=0 stopped=none
+2026-11-24T10:24:58Z INFO Resolved 10 ambiguous content IDs; 36501 of 36501 are now current, leaving 0 for later runs.
